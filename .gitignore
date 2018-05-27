@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Apple plateform
+*.DS_Store
+
+# Visual Stusio Code Intellisense
+*.vscode
