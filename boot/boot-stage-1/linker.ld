@@ -1,3 +1,5 @@
+ENTRY(boot_stage_1_main)
+
 SECTIONS
 {
 	. = 1M;
@@ -8,6 +10,7 @@ SECTIONS
 
 	.text : {
 		*(.text)
+		*(.end)
 	}
 
 	.data : {

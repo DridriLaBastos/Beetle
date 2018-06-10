@@ -1,9 +1,11 @@
-OBJ = header.o
+#Very complicated makefile...
+all:
+	$(MAKE) -C boot-stage-1
 
-$(OBJ): header.s
-	$(AS) -f elf32 $^ -o $@
-
-.PHONY: clean
+.PHONY: clean mrproper
 
 clean:
-	rm $(OBJ)
+	$(MAKE) -C boot-stage-1 clean
+
+mrproper:
+	$(MAKE) -C boot-stage-1 mrproper
