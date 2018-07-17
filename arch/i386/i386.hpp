@@ -25,8 +25,8 @@ constexpr unsigned int PRIVILEGE3 = 3 << 1;
 
 extern "C" 
 {
-    void __attribute__((fastcall)) switch_idt (const int idtr_addr);
-    void __attribute__((fastcall)) switch_gdt (const int gdtr_addr);
+    void __attribute__((fastcall)) switch_idt (const unsigned int idtr_addr);
+    void __attribute__((fastcall)) switch_gdt (const unsigned int gdtr_addr);
 }
 
 /**
@@ -58,8 +58,8 @@ namespace CPU::I386
     {
         uint16_t offset_1;
         uint16_t segment_selector;
-        uint16_t :5, it:7, acces:4;//First 5 bits reserved and it = 0x70 for interrupt gate and 0x78 for trap gate
-                                   //The D field (bit 11) is always set to 1 for 32bits trap/interrupt gate
+        uint16_t :5, it:7, access:4;//First 5 bits are reserved and it = 0x70 for interrupt gate and 0x78 for trap gate
+                                    //The D field (bit 11) is always set to 1 for 32bits trap/interrupt gate
         uint16_t offset_2;
     }__attribute__((packed));
 
@@ -126,7 +126,7 @@ namespace CPU::I386
     inline I_TGateDescriptor create_interruptgate_descriptor (const uint32_t offset, const uint16_t segment_selector, const int access)
     {
         //Explicite conversion to silent some warnings
-        return {(uint16_t)(offset & 0xFFFF), segment_selector, (uint16_t)0x70, (uint16_t)access, (uint16_t)((offset & 0xFFFF0000) >> 16)};
+        return {(uint16_t)(offset & 0xFFFF), segment_selector, (uint16_t)0x70, (uint16_t)access, (uint16_t)(offset  >> 16)};
     }
 
     inline I_TGateDescriptor create_trapgate_descriptor (const uint32_t offset, const uint16_t segment_selector, const int access)
@@ -175,6 +175,7 @@ namespace CPU::I386
             {
                 GDT, IDT
             };
+
         public:
             GlobalTable(const uint16_t count, const uint32_t base);
             GlobalTable(const GlobalTable&) = delete;//No copy constructor for GlobalTable
@@ -195,7 +196,7 @@ namespace CPU::I386
     class IDT: public GlobalTable
     {
         public:
-            IDT(void): GlobalTable(128, 0) { }
+            IDT(void): GlobalTable(32, 0) { }
 
             inline void makeCurrent(void) const final { switch_idt((int)&m_reg); }
     };

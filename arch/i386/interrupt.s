@@ -1,44 +1,74 @@
-global default_int
-global gp_int
-global ss_int
-global np_int
-global pf_int
-global ac_int
-global ud_int
+%macro INTERRUPT 2
+global interrupt_%1
+    interrupt_%1:
+        xchg bx, bx
+        mov al, '('
+        call disp
+        xchg bx, bx
+        mov eax, %2
+        call dispn
+        mov al, ')'
+        call disp
+        iretd
+        
+%endmacro
+
+SECTION .header
+INTERRUPT DE, 0
+INTERRUPT DB, 1
+INTERRUPT NMI, 2
+INTERRUPT BP, 3
+INTERRUPT OF, 4
+INTERRUPT BR, 5
+INTERRUPT UP, 6
+INTERRUPT NM, 7
+INTERRUPT DF, 8
+INTERRUPT CSO, 9
+INTERRUPT TS, 10
+INTERRUPT NP, 11
+INTERRUPT SS, 12
+INTERRUPT GP, 13
+INTERRUPT PF, 14
+INTERRUPT IR, 15
+INTERRUPT MF, 16
+INTERRUPT AC, 17
+INTERRUPT MC, 18
+INTERRUPT XM, 19
+INTERRUPT VE, 20
 
 
-SECTION .text
-default_int:
-    xchg bx, bx
-    mov eax, 0xDEFA0000
-    iretd
+;puts the ascii code inside al into the VGA RAM
+disp:
+    pusha
+    mov ah, 0xC
+    mov ebx, [pos]
+    mov word [0xB8000 + ebx * 2], ax
+    inc dword [pos]
+    popa
+    ret
 
-gp_int:
-    xchg bx, bx
-    mov eax, 0
-    iretd
+;displays the number inside eax
+global dispn
+dispn:
+    pusha
+    mov ebx, 10
+    xor ecx, ecx
+    .start:
+        xor edx, edx
+        div ebx
+        push edx
+        inc ecx
+        cmp eax, 0
+        jz .next
+        jmp .start
+    
+    .next:
+        pop eax
+        add eax, '0'
+        call disp
+        loop .next
+        popa
+        ret
 
-ss_int:
-    xchg bx, bx
-    mov eax, 1
-    iretd
-
-np_int:
-    xchg bx, bx
-    mov eax, 2
-    iretd
-
-pf_int:
-    xchg bx, bx
-    mov eax, 3
-    iretd
-
-ac_int:
-    xchg bx, bx
-    mov eax, 4
-    iretd
-
-ud_int:
-    xchg bx, bx
-    mov eax, 4
-    iretd
+SECTION .data
+    pos: dd 0

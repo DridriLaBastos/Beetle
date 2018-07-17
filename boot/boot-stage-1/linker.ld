@@ -6,6 +6,7 @@ SECTIONS
 	
 	.header : {
 		*(.multiboot_header)
+		*(.interrupt)
 	}
 
 	.text : {

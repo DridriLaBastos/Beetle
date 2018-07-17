@@ -4,9 +4,9 @@ export AS  = nasm
 export AR = $(PREFIX)ar
 export LD  = $(PREFIX)ld
 export CXX = $(PREFIX)g++
-export LDFLAGS  = -nostdlib
-export CPPFLAGS =  -nostdinc++ -isysroot $(SRC_DIR)/include -L$(SRC_DIR)/include/libc
-export CFLAGS   = -c -ffreestanding -mtune=generic -m32 -Wall -Wextra -O1
+export LDFLAGS  = -nostdlib --strip-all
+export CPPFLAGS =  -nostdinc++
+export CFLAGS   = -c -ffreestanding -mtune=generic -m32 -Wall -Wextra
 export CXXFLAGS = $(CFLAGS) -fno-rtti   
 
 export TARGET = i386
@@ -39,7 +39,10 @@ iso:
 run:
 	$(BOCHS) -q
 
-.PHONY: clean mrproper distclean
+drun:
+	@$(MAKE) run DEBUG=1
+
+.PHONY: clean mrproper distclean rebuild
 
 clean:
 	@for i in $(DIR); do $(MAKE) -C $$i clean; done
@@ -52,3 +55,4 @@ mrproper:
 	@for i in $(DIR); do $(MAKE) -C $$i mrproper; done
 
 distclean: clean iclean mrproper
+rebuild: distclean all iso

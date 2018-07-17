@@ -20,8 +20,3 @@ multiboot_header:
     dd MULTIBOOT_MAGIC
     dd MULTIBOOT_FLAGS
     dd MULTIBOOT_CHECKSUM
-
-SECTION .text
-    end:
-        cli
-        hlt
