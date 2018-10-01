@@ -1,3 +1,8 @@
+; This macro creats an interrupt handler for an interrupt vector that displays the vector of the interrupt currently called to the screen.
+; The format of the interrupt is interrupt_<interrupt name>
+; The interrupt function can be called from C or CPP code, or be referenced by its name.
+; for exxemple, for the SS interrupt, the symbol created will be interrupt_SS and will display (12) on the screen
+
 %macro INTERRUPT 2
 global interrupt_%1
     interrupt_%1:
@@ -10,7 +15,6 @@ global interrupt_%1
         mov al, ')'
         call disp
         iretd
-        
 %endmacro
 
 SECTION .header
