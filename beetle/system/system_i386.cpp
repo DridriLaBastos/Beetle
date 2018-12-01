@@ -47,12 +47,13 @@ void BEETLE::SYSTEM::init()
 {
 	CPU::I386::GDT gdt;
 	CPU::I386::IDT idt;
+    
+	/* Initialize the new GDT */
+	init_idt(idt);
 
 	/* Initialize the new GDT */
     init_gdt(gdt);
 
-	/* Initialize the new GDT */
-	init_idt(idt);
 }
 
 void init_gdt (CPU::I386::GDT& gdt)
