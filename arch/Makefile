@@ -7,5 +7,4 @@ clean:
 	$(MAKE) -C $(TARGET) clean
 
 mrproper:
-	@rm $(TARGET).a
 	$(MAKE) -C $(TARGET) mrproper

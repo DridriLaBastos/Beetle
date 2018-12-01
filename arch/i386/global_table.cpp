@@ -3,10 +3,6 @@
 extern "C" void __attribute__((fastcall)) get_gdtr   (const int register_adr);
 extern "C" void __attribute__((fastcall)) get_idtr   (const int register_adr);
 
-CPU::I386::GlobalTable::GlobalTable(const uint16_t count, const uint32_t base): Table(count, base)
-{
-}
-
 void CPU::I386::GlobalTable::retrieve(const TYPE type, GlobalTable& dest)
 {
     (type == TYPE::GDT) ? get_gdtr((int)&dest.m_reg) : get_idtr((int)&dest.m_reg);

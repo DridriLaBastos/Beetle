@@ -3,16 +3,14 @@ CXXHEADERS = $(wildcard *.hpp)
 ASSRC  = $(wildcard *.s)
 CXXOBJ = $(CXXSRC:.cpp=.o)
 ASOBJ  = $(ASSRC:.s=.o)
+OBJ    = $(CXXOBJ) $(ASOBJ)
+PRODUCT = i386.o
 
-OBJ = $(CXXOBJ) $(ASOBJ)
-PRODUCT = i386.a
-
-$(PRODUCT): $(OBJ) $(CXXHEADERS)
-	$(AR) rcs $@ $(OBJ)
-	ln -vf $$(pwd)/$@ $$(pwd)/../$@
+$(PRODUCT) : $(OBJ)
+	$(LD) $(LDFLAGS) --relocatable $^ -o $(PRODUCT)
 	
-%.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fno-exceptions $^ -o $@
+%.o: %.cpp $(CXXHEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fno-exceptions $< -o $@
 
 %.o: %.s
 	$(AS) -f elf32 $^

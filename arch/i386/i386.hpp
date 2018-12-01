@@ -152,6 +152,7 @@ namespace CPU::I386
 
             void add (const SegmentDescriptor descriptor);
             void add (const I_TGateDescriptor descriptor);
+            inline unsigned int get_count (void) const { return m_count; }
 
             virtual void add (const descriptor_t descriptor);
             virtual void del (void);
@@ -177,7 +178,7 @@ namespace CPU::I386
             };
 
         public:
-            GlobalTable(const uint16_t count, const uint32_t base);
+            GlobalTable(const uint16_t count, const uint32_t base): Table(count, base) { }
             GlobalTable(const GlobalTable&) = delete;//No copy constructor for GlobalTable
             static void retrieve (const TYPE type, GlobalTable& dest);
     };
@@ -185,18 +186,22 @@ namespace CPU::I386
     class GDT: public GlobalTable
     {
         public:
-            GDT(void);
+            GDT(void): GlobalTable(16, 0x7C00)
+            {
+                descriptor_t* gdt = (descriptor_t*)m_reg.base;
+                gdt[m_count++] = 0;//First entry of the gdt is always a null descriptor
+            }
         
         public:
             void select (const SEGMENT_NAMES segment_name, const uint16_t segment_selector, const int rpl);
-            void del () override;
+            void del () override { (m_count > 2) ? --m_count : m_count; }
             inline void makeCurrent (void) const final { switch_gdt((int)&m_reg); }
     };
 
     class IDT: public GlobalTable
     {
         public:
-            IDT(void): GlobalTable(32, 0) { }
+            IDT(void): GlobalTable(40, 0) { }
 
             inline void makeCurrent(void) const final { switch_idt((int)&m_reg); }
     };

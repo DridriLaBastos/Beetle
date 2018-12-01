@@ -1,14 +1,13 @@
 CXXSRC = $(wildcard *.cpp)
 ASSRC  = $(wildcard *.s)
+CPPFLAGS := $(CPPFLAGS)
 CXXOBJ = $(CXXSRC:.cpp=.o)
 ASOBJ  = $(ASSRC:.s=.o)
 OBJ    = $(CXXOBJ) $(ASOBJ)
 EXEC   = boot-stage-1
 
-CPPFLAGS = -I $(SRC_DIR)
-
-$(EXEC): $(OBJ)
-	$(LD) $(LDFLAGS) --script=linker.ld -o $@ $(OBJ) $(SRC_DIR)/arch/$(TARGET).a
+$(EXEC): $(OBJ) $(BEETLE)/libsystem.a
+	$(LD) $(LDFLAGS) --script=linker.ld -o $@ $(OBJ) $(BEETLE)/libsystem.a
 
 %.o: %.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@

@@ -39,7 +39,7 @@ INTERRUPT AC, 17
 INTERRUPT MC, 18
 INTERRUPT XM, 19
 INTERRUPT VE, 20
-
+INTERRUPT IRQ0, 32
 
 ;puts the ascii code inside al into the VGA RAM
 disp:
