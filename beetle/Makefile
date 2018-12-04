@@ -4,8 +4,8 @@ CXXSRC = system/system_$(TARGET).cpp
 CXXOBJ = $(CXXSRC:.cpp=.o)
 PRODUCT=libsystem.a
 
-$(PRODUCT): $(CXXOBJ)
-	$(AR) rcs $@ $(CXXOBJ) $(TARGET_OBJ)
+$(PRODUCT): $(CXXOBJ) $(TARGET_OBJ)
+	$(AR) rcs $@ $^
 
 %.o: %.cpp include/system.hpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< -o $@

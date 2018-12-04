@@ -5,7 +5,7 @@ export AS  = nasm
 export AR = $(PREFIX)ar
 export LD  = $(PREFIX)ld
 export CXX = $(PREFIX)g++
-export LDFLAGS  = -nostdlib --strip-all
+export LDFLAGS  = -nostdlib
 export CPPFLAGS =  -nostdinc++ -I$(SRC_DIR)
 export CFLAGS   = -c -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
 export CXXFLAGS = $(CFLAGS) -fno-rtti   

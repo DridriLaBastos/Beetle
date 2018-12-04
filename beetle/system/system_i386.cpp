@@ -48,27 +48,19 @@ void BEETLE::SYSTEM::init()
 	CPU::I386::GDT gdt;
 	CPU::I386::IDT idt;
 
-
 	/* Initialize the new GDT */
     init_gdt(gdt);
-    BDG;
-    NOP;
 
 	/* Initialize the new GDT */
 	init_idt(idt);
-    BDG;
-    NOP;
 }
 
 void init_gdt (CPU::I386::GDT& gdt)
 {
-    // adding two admin flat segments
-    gdt.add(CPU::I386::create_segment_descriptor(0, 0xFFFFF, CPU::I386::C_ER, PRESENT | PRIVILEGE0 | CODE_DATA, 0b1100));
-    gdt.add(CPU::I386::create_segment_descriptor(0, 0xFFFFF, CPU::I386::D_RW, PRESENT | PRIVILEGE0 | CODE_DATA, 0b1100));
+    // adding two admin segments
+    gdt.add(CPU::I386::create_segment_descriptor(0, 0xFFFFF, CPU::I386::C_ER, PRESENT | PRIVILEGE0, G_DB_L_AVL(1,1,0,0)));
+    gdt.add(CPU::I386::create_segment_descriptor(0, 0xFFFFF, CPU::I386::D_RW, PRESENT | PRIVILEGE0, G_DB_L_AVL(1,1,0,0)));
 
-    // adding two user flat segments
-    gdt.add(CPU::I386::create_segment_descriptor(0, 0xFFFFF, CPU::I386::C_ER, PRESENT | PRIVILEGE3 | CODE_DATA, 0b1100));
-    gdt.add(CPU::I386::create_segment_descriptor(0, 0xFFFFF, CPU::I386::D_RW, PRESENT | PRIVILEGE3 | CODE_DATA, 0b1100));
 	gdt.makeCurrent();
 
 	gdt.select(CPU::I386::SEGMENT_NAMES::DS, 2, 0);
@@ -104,13 +96,9 @@ void init_idt (CPU::I386::IDT& idt)
 
     for (unsigned i = idt.get_count(); i < 32; ++i)
     {
-        //Intel manual says that an interrupt gate descriptor with the present flag cleared will be evalued as emtpy
         idt.add(CPU::I386::create_interruptgate_descriptor(0,0x8,NO_PRESENT));
     }
 
-    idt.add(CPU::I386::create_interruptgate_descriptor((uint32_t)interrupt_IRQ0, 0x8, PRESENT | PRIVILEGE0));
-
-	// TODO: figure out why an interrupt is emited here
-    BDG;
+	// TODO: figure out why an interrupt is emited after here
     idt.makeCurrent();
 }

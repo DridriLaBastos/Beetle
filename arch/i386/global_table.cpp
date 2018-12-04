@@ -9,7 +9,11 @@ void CPU::I386::GlobalTable::retrieve(const TYPE type, GlobalTable& dest)
 
     const uint32_t max = (dest.m_reg.limit + 1)/8;
 
-    uint16_t count = (int)(type == TYPE::GDT);
+    /*
+     * the loop while stop when it find an entry filed with 0's.
+     * But for GDTs the first entry is alway 0 the count starts at 1
+     */
+    uint16_t count = (type == TYPE::GDT) ? 1 : 0;
     uint64_t* table = (uint64_t*)dest.m_reg.base;//descriptors are 64bits long
 
     while ((count < max) && table[count] != 0){++count;}
