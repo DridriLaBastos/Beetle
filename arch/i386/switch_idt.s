@@ -12,3 +12,4 @@ switch_idt:
     out 0x21, al
     sti
     ret
+    
