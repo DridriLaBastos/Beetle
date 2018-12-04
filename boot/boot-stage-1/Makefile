@@ -7,7 +7,7 @@ OBJ    = $(CXXOBJ) $(ASOBJ)
 EXEC   = boot-stage-1
 
 $(EXEC): $(OBJ) $(BEETLE)/libsystem.a
-	$(LD) $(LDFLAGS) --script=linker.ld -o $@ $(OBJ) $(BEETLE)/libsystem.a
+	$(LD) $(LDFLAGS) --script=linker.ld $(OBJ) $(BEETLE)/libsystem.a -o $@
 
 %.o: %.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@

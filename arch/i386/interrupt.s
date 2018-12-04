@@ -1,15 +1,12 @@
-; This macro creats an interrupt handler for an interrupt vector that displays the vector of the interrupt currently called to the screen.
+; This macro creats an interrupt handler that displays the vector of the interrupt currently called to the screen.
 ; The format of the interrupt is interrupt_<interrupt name>
-; The interrupt function can be called from C or CPP code, or be referenced by its name.
-; for exxemple, for the SS interrupt, the symbol created will be interrupt_SS and will display (12) on the screen
+; Exemple : for the SS interrupt, the symbol created will be interrupt_SS and will display "(12)" on the screen
 
 %macro INTERRUPT 2
 global interrupt_%1
     interrupt_%1:
-        xchg bx, bx
         mov al, '('
         call disp
-        xchg bx, bx
         mov eax, %2
         call dispn
         mov al, ')'
@@ -39,7 +36,6 @@ INTERRUPT AC, 17
 INTERRUPT MC, 18
 INTERRUPT XM, 19
 INTERRUPT VE, 20
-INTERRUPT IRQ0, 32
 
 ;puts the ascii code inside al into the VGA RAM
 disp:
