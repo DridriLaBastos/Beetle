@@ -99,6 +99,5 @@ void init_idt (CPU::I386::IDT& idt)
         idt.add(CPU::I386::create_interruptgate_descriptor(0,0x8,NO_PRESENT));
     }
 
-	// TODO: figure out why an interrupt is emited after here
     idt.makeCurrent();
 }
