@@ -9,7 +9,7 @@ extern "C"
     void __attribute__((fastcall)) load_ss    (const unsigned int ss_descriptor);
 }
 
-void CPU::I386::GDT::select(const SEGMENT_NAMES segment_name, const uint16_t segment_pos, const int rpl)
+void ARCH::I386::GDT::select(const SEGMENT_NAMES segment_name, const uint16_t segment_pos, const int rpl)
 {
     const uint16_t segment_selector = rpl | (segment_pos << 3);
 

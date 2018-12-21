@@ -36,7 +36,7 @@ extern "C"
 /**
  * In this namespace any i386 architecture feature will be implemented
  * */
-namespace CPU::I386
+namespace ARCH::I386
 {
     using descriptor_t    = uint64_t;
 
@@ -221,5 +221,10 @@ namespace CPU::I386
 
             inline void makeCurrent(void) const final { switch_idt((int)&m_reg); }
     };
+
 }
+
+#include "cpuid.hpp"
+#include "apic.hpp"
+
 #endif

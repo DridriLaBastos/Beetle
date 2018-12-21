@@ -3,7 +3,7 @@
 extern "C" void __attribute__((fastcall)) get_gdtr   (const int register_adr);
 extern "C" void __attribute__((fastcall)) get_idtr   (const int register_adr);
 
-void CPU::I386::GlobalTable::retrieve(const TYPE type, GlobalTable& dest)
+void ARCH::I386::GlobalTable::retrieve(const TYPE type, GlobalTable& dest)
 {
     (type == TYPE::GDT) ? get_gdtr((int)&dest.m_reg) : get_idtr((int)&dest.m_reg);
 
