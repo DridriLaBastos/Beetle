@@ -55,7 +55,7 @@ void BEETLE::SYSTEM::init()
 	/* Initialize the new GDT */
     init_gdt(gdt);
 
-	/* Initialize the new GDT */
+	/* Initialize the new IDT */
 	init_idt(idt);
 
     /* Initializing the local APIC if present */
@@ -79,6 +79,12 @@ void init_gdt (ARCH::I386::GDT& gdt)
 
 void init_idt (ARCH::I386::IDT& idt)
 {
+    //Shuting down the pic
+    __asm__ ("movb $0xFF, %al\n"
+    "outb %al, $0xA1\n"
+    "outb %al, $0x21\n");
+
+    //Initializing IDT descriptors
     idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_DE,  0x8, PRESENT | PRIVILEGE0));
     idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_DB,  0x8, PRESENT | PRIVILEGE0));
     idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_NMI, 0x8, PRESENT | PRIVILEGE0));

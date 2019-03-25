@@ -5,16 +5,17 @@ export AS  = nasm
 export AR = $(PREFIX)ar
 export LD  = $(PREFIX)ld
 export CXX = $(PREFIX)g++
-export LDFLAGS  = -nostdlib
+export LDFLAGS  = -nostdlib -flto --strip-all
 export CPPFLAGS =  -nostdinc++ -I$(SRC_DIR)
 export CFLAGS   = -c -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
-export CXXFLAGS = $(CFLAGS) -fno-rtti   
+export CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
 
 export TARGET = i386
+export PLATFORM = pc
 
 MAJOR_VERSION = 0
 MINOR_VERSION = 1
-FIX_VERSION   = 1
+FIX_VERSION   = 2 # 2 implementing the apics functionnality of the 0.1* version
 
 DIR = arch beetle boot
 DEBUG = 
