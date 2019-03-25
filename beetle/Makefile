@@ -1,10 +1,9 @@
-PRODUCT = libsys.a
-TARGET_OBJ = $(SRC_DIR)/arch/$(TARGET)/$(TARGET).o
-CXXSRC = system/system_$(TARGET).cpp
+FINAL_OBJ = $(SRC_DIR)/arch/$(TARGET)/$(TARGET).o
+CXXSRC = system/system_$(TARGET)_$(PLATFORM).cpp
 CXXOBJ = $(CXXSRC:.cpp=.o)
 PRODUCT=libsystem.a
 
-$(PRODUCT): $(CXXOBJ) $(TARGET_OBJ)
+$(PRODUCT): $(CXXOBJ) $(FINAL_OBJ)
 	$(AR) rcs $@ $^
 
 %.o: %.cpp include/system.hpp

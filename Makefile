@@ -11,6 +11,7 @@ export CFLAGS   = -c -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
 export CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
 
 export TARGET = i386
+export PLATFORM = pc
 
 MAJOR_VERSION = 0
 MINOR_VERSION = 1
