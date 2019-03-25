@@ -55,7 +55,7 @@ void BEETLE::SYSTEM::init()
 	/* Initialize the new GDT */
     init_gdt(gdt);
 
-	/* Initialize the new GDT */
+	/* Initialize the new IDT */
 	init_idt(idt);
 
     /* Initializing the local APIC if present */

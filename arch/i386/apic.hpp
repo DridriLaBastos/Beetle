@@ -107,4 +107,21 @@ namespace ARCH::I386::APIC::LVT
 	}
 }
 
+namespace ARCH::I386::APIC
+{
+	inline uint32_t get_apic_entry (const unsigned int n)
+	{
+		uint32_t* apic = (uint32_t*)0xFEE00000;
+		return apic[n * 4];
+	} 
+
+	inline void write_apic_entry (const unsigned int n, const uint32_t v)
+	{
+		uint32_t* apic = (uint32_t*)(0xFEE00000);
+		apic[n * 4] = v;
+	}
+
+	inline uint32_t get_apic_version (void) { return get_apic_entry(3); }
+}
+
 #endif
