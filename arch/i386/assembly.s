@@ -6,11 +6,13 @@ SECTION .text
 ;edx : addres of the CPUIDResult structur to fill
 get_cpuid:
 	mov eax, ecx
+    mov edi, edx
+    xchg bx, bx
 	cpuid
-	mov dword [edx + 4 * 0], eax
-	mov dword [edx + 4 * 1], ebx
-	mov dword [edx + 4 * 2], ecx
-	mov dword [edx + 4 * 3], edx
+	mov dword [edi + 4 * 0], eax
+	mov dword [edi + 4 * 1], ebx
+	mov dword [edi + 4 * 2], ecx
+	mov dword [edi + 4 * 3], edx
 	ret
 
 ;get_gdtr return the value stored inside the gdtr at the address stored in ecx

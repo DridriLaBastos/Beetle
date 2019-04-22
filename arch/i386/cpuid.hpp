@@ -28,6 +28,8 @@ namespace ARCH::I386
 			TEN
 		};
 
+		inline bool getBitValue (const unsigned int b, const unsigned int value) { return (value & (1 << b)) >> b; }
+
 		CPUID (const FUNCTIONS f): result({0, 0, 0, 0})
 		{ get_cpuid(static_cast<unsigned int>(f), &result); }
 

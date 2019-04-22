@@ -10,8 +10,8 @@ constexpr unsigned int NO_PRESENT = 0;
 
 //Possible values for the field S in segment descriptor
 //These constants should not be use direcly, there are used in the *_SEGMENT_T enums
-constexpr unsigned int SYSTEM = 0 << 4;
-constexpr unsigned int CODE_DATA = 1 << 4;
+constexpr unsigned int SYSTEM(const unsigned int n) { return n; }
+constexpr unsigned int CODE_DATA(const unsigned int n) { return n | (1 << 4); }
 
 //Possible values for the field DPL in any descriptors
 constexpr unsigned int PRIVILEGE0 = 0;
@@ -70,43 +70,43 @@ namespace ARCH::I386
 
     enum CODE_DATA_SEGMENT_T
     {
-        D_RO    =  0 | CODE_DATA, //Data read only
-        D_ROA   =  1 | CODE_DATA, //Data read only accessed
-        D_RW    =  2 | CODE_DATA, //Data read/write
-        D_RWA   =  3 | CODE_DATA, //Data read/write accessed
-        D_ROE   =  4 | CODE_DATA, //Data read only expand down
-        D_ROEA  =  5 | CODE_DATA, //Data read only expand down accessed
-        D_RWE   =  6 | CODE_DATA, //Data read write expand down
-        D_RWEA  =  7 | CODE_DATA, //Data read write expand down accessed
+        D_RO    = CODE_DATA( 0), //Data read only
+        D_ROA   = CODE_DATA( 1), //Data read only accessed
+        D_RW    = CODE_DATA( 2), //Data read/write
+        D_RWA   = CODE_DATA( 3), //Data read/write accessed
+        D_ROE   = CODE_DATA( 4), //Data read only expand down
+        D_ROEA  = CODE_DATA( 5), //Data read only expand down accessed
+        D_RWE   = CODE_DATA( 6), //Data read write expand down
+        D_RWEA  = CODE_DATA( 7), //Data read write expand down accessed
 
-        C_EO    =  8 | CODE_DATA, //Code execute only
-        C_EOA   =  9 | CODE_DATA, //Code execute only accessed
-        C_ER    = 10 | CODE_DATA, //Code execute read
-        C_ERA   = 11 | CODE_DATA, //Code execute read accessed
-        C_EOC   = 12 | CODE_DATA, //Code execute only conforming
-        C_EOCA  = 13 | CODE_DATA, //Code execute only confirming accessed
-        C_ERC   = 14 | CODE_DATA, //Code execute read conforming
-        C_ERCA  = 15 | CODE_DATA  //Code execute read conforming accessed
+        C_EO    = CODE_DATA( 8), //Code execute only
+        C_EOA   = CODE_DATA( 9), //Code execute only accessed
+        C_ER    = CODE_DATA(10), //Code execute read
+        C_ERA   = CODE_DATA(11), //Code execute read accessed
+        C_EOC   = CODE_DATA(12), //Code execute only conforming
+        C_EOCA  = CODE_DATA(13), //Code execute only confirming accessed
+        C_ERC   = CODE_DATA(14), //Code execute read conforming
+        C_ERCA  = CODE_DATA(15)  //Code execute read conforming accessed
     };
 
     enum SYSTEM_SEGMENT_T
     {
         // 0 = reserved
-        TSS_A_16 =  1 | SYSTEM, //16 bits TSS available
-        LDT      =  2 | SYSTEM, //LDT
-        TSS_B_16 =  3 | SYSTEM, //16 bits TSS busy
-        CG_16    =  4 | SYSTEM, //16 bits call gate
-        TG       =  5 | SYSTEM, //task gate
-        IG_16    =  6 | SYSTEM, //16 bits interrupt gate
-        TG_16    =  7 | SYSTEM, //16 bits trap gate
+        TSS_A_16 = SYSTEM( 1), //16 bits TSS available
+        LDT      = SYSTEM( 2), //LDT
+        TSS_B_16 = SYSTEM( 3), //16 bits TSS busy
+        CG_16    = SYSTEM( 4), //16 bits call gate
+        TG       = SYSTEM( 5), //task gate
+        IG_16    = SYSTEM( 6), //16 bits interrupt gate
+        TG_16    = SYSTEM( 7), //16 bits trap gate
         // 8 = reserved
-        TSS_A_32 =  9 | SYSTEM, //32 bits TSS available
+        TSS_A_32 = SYSTEM( 9), //32 bits TSS available
         // 10 = reserved
-        TSS_B_32 = 10 | SYSTEM, //32 bits TSS busy
-        CG_32    = 11 | SYSTEM, //32 bits call gate
+        TSS_B_32 = SYSTEM(10), //32 bits TSS busy
+        CG_32    = SYSTEM(11), //32 bits call gate
         // 13 = reserved
-        IG_32    = 14 | SYSTEM, //32 bits interrupt gate
-        TG_32    = 15 | SYSTEM  //32 bits trap gate
+        IG_32    = SYSTEM(14), //32 bits interrupt gate
+        TG_32    = SYSTEM(15)  //32 bits trap gate
     };
 
     enum class SEGMENT_NAMES

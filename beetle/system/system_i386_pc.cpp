@@ -60,6 +60,8 @@ void BEETLE::SYSTEM::init()
 
     /* Initializing the local APIC if present */
     init_apic(idt);
+
+    idt.makeCurrent();
 }
 
 void init_gdt (ARCH::I386::GDT& gdt)
@@ -108,11 +110,7 @@ void init_idt (ARCH::I386::IDT& idt)
     idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_VE,  0x8, PRESENT | PRIVILEGE0));
 
     for (unsigned i = idt.get_count(); i < 32; ++i)
-    {
         idt.add(ARCH::I386::create_interruptgate_descriptor(0,0x8,NO_PRESENT));
-    }
-
-    idt.makeCurrent();
 }
 
 void init_apic (ARCH::I386::IDT& idt)
@@ -120,11 +118,7 @@ void init_apic (ARCH::I386::IDT& idt)
     /* Checking for presence of a local APIC */
     ARCH::I386::CPUID c (ARCH::I386::CPUID::FUNCTIONS::ONE);
 
-    if (c.result.edx & (1 << 9))
-    {
-        //Its okay
-    }
-    else
+    if (!c.getBitValue(9,c.result.edx))
     {
         //That's really BAD because for now we can't tell the user that his CPU isn't suported
         //but we are in 2018, what sort of intel CPU doesn't have a Local APIC ?
