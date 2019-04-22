@@ -5,10 +5,13 @@ export AS  = nasm
 export AR = $(PREFIX)ar
 export LD  = $(PREFIX)ld
 export CXX = $(PREFIX)g++
+export DEPFLAGS = -MM -MF
 export LDFLAGS  = -nostdlib -flto --strip-all
 export CPPFLAGS =  -nostdinc++ -I$(SRC_DIR)
 export CFLAGS   = -c -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
 export CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
+
+export POSTCOMPILE = @mv -f $*.Td $*.d && touch $@
 
 export TARGET = i386
 export PLATFORM = pc
