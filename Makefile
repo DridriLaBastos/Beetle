@@ -1,12 +1,12 @@
 export SRC_DIR    = $(shell pwd)#sources directories
 export BEETLE = $(SRC_DIR)/beetle
-export PREFIX = i686-elf-
+export PREFIX =
 export AS  = nasm
 export AR = $(PREFIX)ar
 export LD  = $(PREFIX)ld
-export CXX = $(PREFIX)g++
+export CXX = $(PREFIX)g++ -m32
 export DEPFLAGS = -MM -MF
-export LDFLAGS  = -nostdlib -flto --strip-all
+export LDFLAGS  = -nostdlib -flto --strip-all -melf_i386
 export CPPFLAGS =  -nostdinc++ -I$(SRC_DIR)
 export CFLAGS   = -c -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
 export CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
@@ -28,8 +28,15 @@ endif
 
 BOCHS = $(BOCHS_PREFIX)bochs
 
-all:
-	@for i in $(DIR); do $(MAKE) -C $$i; echo; done
+.PHONY: all $(DIR) clean mrproper distclean rebuild
+
+all: $(DIR)
+
+$(DIR):
+	$(MAKE) -C $@
+
+beetle: arch
+boot: beetle
 
 iso: boot/boot-stage-1/boot-stage-1
 	@mkdir -p iso/boot/grub
@@ -44,8 +51,6 @@ run:
 
 drun:
 	@$(MAKE) run DEBUG=1
-
-.PHONY: clean mrproper distclean rebuild
 
 clean:
 	@for i in $(DIR); do $(MAKE) -C $$i clean; done
