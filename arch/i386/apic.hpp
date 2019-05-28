@@ -1,7 +1,9 @@
 #ifndef ACPI_HPP
 #define ACPI_HPP
 
-namespace ARCH::I386::APIC::LVT
+#include <stdint.h>
+
+namespace ARCH::I386::LOCAL_APIC::LVT
 {
 	enum D_MODE
 	{
@@ -37,8 +39,18 @@ namespace ARCH::I386::APIC::LVT
 		TSC_DEADLINE = 0b10
 	};
 
+	enum class REGISTER
+	{
+		TIMER = 0,
+		LINT0, LINT1,
+		PERF,
+		THERM,
+		ERROR,
+		COUNT
+	};
+
 	/**
-	 * \struct ARCH::I386::APIC::LVT::LINTRegister apic.hpp
+	 * \struct ARCH::I386::LOCAL_APIC::LVT::LINTRegister apic.hpp
 	 * Defines the structure of the LINT0 and LINT1 register in the LVT of a local APIC
 	 * 
 	 * - vector : the interrupt vector to be transferred to the CPU
@@ -85,6 +97,9 @@ namespace ARCH::I386::APIC::LVT
 		uint32_t vector:8, :4, d_stat:1, :3, mask:1, ti_mode:2;
 	};
 
+	void write_lvt_reg (const uint32_t reg_value, const REGISTER register);
+	void write_cmci_reg (const uint32_t reg_value);
+
 	inline LINTRegister create_lint_register (const unsigned int vec, const D_MODE d_mode, const D_STAT d_stat, const unsigned int iipp, const unsigned int remote_irr, const T_MODE t_mode, const MASK mask)
 	{ 
 		LINTRegister result;
@@ -107,21 +122,15 @@ namespace ARCH::I386::APIC::LVT
 	}
 }
 
-namespace ARCH::I386::APIC
+namespace ARCH::I386::LOCAL_APIC
 {
-	inline uint32_t get_apic_entry (const unsigned int n)
-	{
-		uint32_t* apic = (uint32_t*)0xFEE00000;
-		return apic[n * 4];
-	} 
+	uint32_t read_entry (const unsigned int n);
+	uint32_t read_version (void);
 
-	inline void write_apic_entry (const unsigned int n, const uint32_t v)
-	{
-		uint32_t* apic = (uint32_t*)(0xFEE00000);
-		apic[n * 4] = v;
-	}
+	void write_entry (const unsigned int n, const uint32_t reg_value);
 
-	inline uint32_t get_apic_version (void) { return get_apic_entry(3); }
+	void software_enable(void);
+	void software_disable(void);
 }
 
 #endif

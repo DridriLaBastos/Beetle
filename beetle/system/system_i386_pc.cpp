@@ -18,7 +18,7 @@ using namespace ARCH::I386;
 
 void init_gdt  (GDT&);
 void init_idt  (IDT&);
-void init_apic (IDT&);
+void init_apic (void);
 
 
 extern "C" 
@@ -59,7 +59,7 @@ void BEETLE::SYSTEM::init()
 	init_idt(idt);
 
     /* Initializing the local APIC if present */
-    init_apic(idt);
+    init_apic();
 
     idt.makeCurrent();
 }
@@ -82,9 +82,10 @@ void init_gdt (ARCH::I386::GDT& gdt)
 void init_idt (ARCH::I386::IDT& idt)
 {
     //Shuting down the pic
-    __asm__ ("movb $0xFF, %al\n"
-    "outb %al, $0xA1\n"
-    "outb %al, $0x21\n");
+    __asm__ (
+        "movb $0xFF, %al\n"
+        "outb %al, $0xA1\n"
+        "outb %al, $0x21\n");
 
     //Initializing IDT descriptors
     idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_DE,  0x8, PRESENT | PRIVILEGE0));
@@ -113,16 +114,20 @@ void init_idt (ARCH::I386::IDT& idt)
         idt.add(ARCH::I386::create_interruptgate_descriptor(0,0x8,NO_PRESENT));
 }
 
-void init_apic (ARCH::I386::IDT& idt)
+void init_apic (void)
 {
     /* Checking for presence of a local APIC */
     ARCH::I386::CPUID c (ARCH::I386::CPUID::FUNCTIONS::ONE);
 
     if (!c.getBitValue(9,c.result.edx))
     {
-        //That's really BAD because for now we can't tell the user that his CPU isn't suported
-        //but we are in 2018, what sort of intel CPU doesn't have a Local APIC ?
-        asm("mov $0xBACE, %eax");//Beetle ApiC Error
-        for(;;);//Nothing else to do
+        //Use the pic instead, but nowadayw every intel processor should have a local APIC
+        __asm__ ("mov $0xBACE, %eax");//Beetle ApiC Error for debugging purpose
+    }
+    else
+    {
+        /* Initialization of the IVT */
+        BDG;
+        ARCH::I386::LOCAL_APIC::read_version();
     }
 }

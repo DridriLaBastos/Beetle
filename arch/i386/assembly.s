@@ -7,7 +7,6 @@ SECTION .text
 get_cpuid:
 	mov eax, ecx
     mov edi, edx
-    xchg bx, bx
 	cpuid
 	mov dword [edi + 4 * 0], eax
 	mov dword [edi + 4 * 1], ebx

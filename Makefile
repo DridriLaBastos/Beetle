@@ -1,6 +1,6 @@
 export SRC_DIR    = $(shell pwd)#sources directories
 export BEETLE = $(SRC_DIR)/beetle
-export PREFIX =
+export PREFIX = i686-elf-
 export AS  = nasm
 export AR = $(PREFIX)ar
 export LD  = $(PREFIX)ld
@@ -35,8 +35,8 @@ all: $(DIR)
 $(DIR):
 	$(MAKE) -C $@
 
-beetle: arch
 boot: beetle
+beetle: arch
 
 iso: boot/boot-stage-1/boot-stage-1
 	@mkdir -p iso/boot/grub

@@ -27,4 +27,4 @@ clean:
 mrproper:
 	rm $(PRODUCT)
 
-include $(wildcard $(patsubst %, %.d, $(basename $(CXXSRC))))
+include $(wildcard $(patsubst %, %.d, $(CXXSRC)))
