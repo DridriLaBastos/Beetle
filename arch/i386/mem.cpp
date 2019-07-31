@@ -30,7 +30,7 @@ ARCH::I386::GDT::GDT(const unsigned int base, const unsigned int count): Table(b
 
 void ARCH::I386::GDT::addSegmentDescriptor(const unsigned int base, const unsigned int limit, const unsigned int type, const unsigned int access, const unsigned int other)
 {
-	const unsigned int segmentDescriptorHighLow		= ((((access & 0b111) << 4) | type) << 8) | ((base & 0xFF0000) >> 16);
+	const unsigned int segmentDescriptorHighLow		= ((((access & 0b111) << 5) | type) << 8) | ((base & 0xFF0000) >> 16);
 	const unsigned int segmentDescriptorHighHigh	= ((base & 0xFF000000) >> 16) | (((other & 0xF) << 4) | ((limit & 0xF0000) >> 16));
 
 	const unsigned int segmentDescriptorLow 	= ((base && 0xFFFF) << 16) | (limit & 0xFFFF);
@@ -47,8 +47,9 @@ ARCH::I386::IDT::IDT(const unsigned int base, const unsigned int count): Table(b
 
 void ARCH::I386::IDT::addInterruptGateDescriptor (const unsigned int offset, const unsigned int segment_selector, const unsigned int access, const bool size32)
 {
-	const unsigned int descriptorHighLow = ((access & 0b111) << 16) | ((size32 ? 1 : 0) << 11) | (0b110 << 10);
-	const unsigned int descriptorLow	= ((offset & 0xFFFF) << 16) | segment_selector;
+	const unsigned int descriptorHighLow = ((access & 0b111) << 13) | ((size32 ? 1 : 0) << 11) | (0b11 << 9);
+
+	const unsigned int descriptorLow	= (segment_selector << 16) | (offset & 0xFFFF);
 	const unsigned int descriptorHigh	= (offset & 0xFFFF0000) | descriptorHighLow;
 
 	add({descriptorLow, descriptorHigh});

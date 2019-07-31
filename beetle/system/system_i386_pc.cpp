@@ -79,7 +79,6 @@ void init_gdt (ARCH::I386::GDT& gdt)
     gdt.select(ARCH::I386::SEGMENT_NAMES::ES, 0, 0);*/
 }
 
-template <unsigned int IDT_BASE, unsigned int IDT_COUNT>
 void init_idt (ARCH::I386::IDT& idt)
 {
     //Shuting down the pic
@@ -128,7 +127,6 @@ void init_apic (void)
     else
     {
         /* Initialization of the IVT */
-        BDG;
         ARCH::I386::LOCAL_APIC::read_version();
     }
 }

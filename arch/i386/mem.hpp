@@ -3,17 +3,14 @@
 
 #include <stdint.h>
 
-//TODO: maybe a better that ensure that g, db, l and avl are 1bit long ?
-#define G_DB_L_AVL(g,db,l,avl) 0b##g##db##l##avl
-
 //Possible values for the field P of any descriptors
 constexpr unsigned int PRESENT		= 1 << 2;
 constexpr unsigned int NOT_PRESENT	= 0;
 
-constexpr unsigned int EXEC_32B	= 1 << 3;
+constexpr unsigned int EXEC_32B	= 1 << 2;
 constexpr unsigned int EXEC_16B	= 0;
 
-constexpr unsigned int LIMIT_4K		= 1 << 4;
+constexpr unsigned int LIMIT_4K		= 1 << 3;
 constexpr unsigned int LIMIT_BYTES	= 0;
 
 //Possible values for the field S in segment descriptor
@@ -32,7 +29,6 @@ constexpr unsigned int PRIVILEGE3 = 3;
  * */
 namespace ARCH::I386
 {
-
     struct Register
     {
         uint16_t limit;
@@ -41,8 +37,8 @@ namespace ARCH::I386
 
     struct Descriptor
 	{
-		uint32_t high;
 		uint32_t low;
+		uint32_t high;
 	};
 
     enum CODE_DATA_SEGMENT_T
