@@ -28,7 +28,10 @@ load_gs:
     mov gs, ax
     ret
 
+;Loading ss is a littlebit trickier than loading other segment, we have to recover the informations stored in the old stack and copy theme in the new stack before
+;performing the switch
 load_ss:
+	push ecx
     mov ax, cx
     mov ss, ax
     ret

@@ -49,8 +49,8 @@ extern "C"
 
 void BEETLE::SYSTEM::init()
 {
-	ARCH::I386::GDT gdt;
-	ARCH::I386::IDT idt;
+	ARCH::I386::GDT gdt (0x1000,512);
+	ARCH::I386::IDT idt (0x500, 256);
 
 	/* Initialize the new GDT */
     init_gdt(gdt);
@@ -67,18 +67,19 @@ void BEETLE::SYSTEM::init()
 void init_gdt (ARCH::I386::GDT& gdt)
 {
     // adding two admin segments
-    gdt.add(ARCH::I386::create_segment_descriptor(0, 0xFFFFF, ARCH::I386::C_ER, PRESENT | PRIVILEGE0, G_DB_L_AVL(1,1,0,0)));
-    gdt.add(ARCH::I386::create_segment_descriptor(0, 0xFFFFF, ARCH::I386::D_RW, PRESENT | PRIVILEGE0, G_DB_L_AVL(1,1,0,0)));
+    gdt.addSegmentDescriptor(0, 0xFFFFF, ARCH::I386::C_EO, PRESENT | PRIVILEGE0, EXEC_32B | LIMIT_4K);
+    gdt.addSegmentDescriptor(0, 0xFFFFF, ARCH::I386::D_RW, PRESENT | PRIVILEGE0, EXEC_32B | LIMIT_4K);
 
 	gdt.makeCurrent();
 
-	gdt.select(ARCH::I386::SEGMENT_NAMES::DS, 2, 0);
+	/*gdt.select(ARCH::I386::SEGMENT_NAMES::DS, 2, 0);
     gdt.select(ARCH::I386::SEGMENT_NAMES::FS, 0, 0);
     gdt.select(ARCH::I386::SEGMENT_NAMES::GS, 0, 0);
     gdt.select(ARCH::I386::SEGMENT_NAMES::SS, 2, 0);
-    gdt.select(ARCH::I386::SEGMENT_NAMES::ES, 0, 0);
+    gdt.select(ARCH::I386::SEGMENT_NAMES::ES, 0, 0);*/
 }
 
+template <unsigned int IDT_BASE, unsigned int IDT_COUNT>
 void init_idt (ARCH::I386::IDT& idt)
 {
     //Shuting down the pic
@@ -88,30 +89,30 @@ void init_idt (ARCH::I386::IDT& idt)
         "outb %al, $0x21\n");
 
     //Initializing IDT descriptors
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_DE,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_DB,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_NMI, 0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_BP,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_OF,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_BR,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_UP,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_NM,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_DF,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_CSO, 0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_TS,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_NP,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_SS,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_GP,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_PF,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_IR,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_MF,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_AC,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_MC,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_XM,  0x8, PRESENT | PRIVILEGE0));
-    idt.add(ARCH::I386::create_interruptgate_descriptor((uint32_t)interrupt_VE,  0x8, PRESENT | PRIVILEGE0));
+    idt.addInterruptGateDescriptor((unsigned)interrupt_DE,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_DB,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_NMI, 0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_BP,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_OF,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_BR,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_UP,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_NM,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_DF,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_CSO, 0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_TS,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_NP,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_SS,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_GP,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_PF,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_IR,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_MF,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_AC,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_MC,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_XM,  0x8, PRESENT | PRIVILEGE0);
+    idt.addInterruptGateDescriptor((unsigned)interrupt_VE,  0x8, PRESENT | PRIVILEGE0);
 
-    for (unsigned i = idt.get_count(); i < 32; ++i)
-        idt.add(ARCH::I386::create_interruptgate_descriptor(0,0x8,NO_PRESENT));
+    for (unsigned i = idt.getCount(); i < 32; ++i)
+        idt.addInterruptGateDescriptor(0,0x8,NOT_PRESENT);
 }
 
 void init_apic (void)

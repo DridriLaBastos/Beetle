@@ -1,15 +1,18 @@
 export SRC_DIR    = $(shell pwd)#sources directories
 export BEETLE = $(SRC_DIR)/beetle
-export PREFIX = i686-elf-
+
+ifeq ($(shell uname -s), Darwin)
+	export PREFIX = i686-elf-
+endif
+
 export AS  = nasm
 export AR = $(PREFIX)ar
 export LD  = $(PREFIX)ld
-export CXX = $(PREFIX)g++ -m32
-export DEPFLAGS = -MM -MF
+export CXX = $(PREFIX)g++ -m32 -std=c++11
 export LDFLAGS  = -nostdlib -flto --strip-all -melf_i386
-export CPPFLAGS =  -nostdinc++ -I$(SRC_DIR)
+export CPPFLAGS = -nostdinc++ -I$(SRC_DIR)
 export CFLAGS   = -c -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
-export CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
+export CXXFLAGS = $(CFLAGS) -fno-rtti -fstrict-enums -fno-threadsafe-statics
 
 export TARGET = i386
 export PLATFORM = pc

@@ -1,12 +1,20 @@
 #ifndef MEMORY_HPP
 #define MEMORY_HPP
 
+#include <stdint.h>
+
 //TODO: maybe a better that ensure that g, db, l and avl are 1bit long ?
 #define G_DB_L_AVL(g,db,l,avl) 0b##g##db##l##avl
 
 //Possible values for the field P of any descriptors
-constexpr unsigned int PRESENT = 1 << 2;
-constexpr unsigned int NO_PRESENT = 0;
+constexpr unsigned int PRESENT		= 1 << 2;
+constexpr unsigned int NOT_PRESENT	= 0;
+
+constexpr unsigned int EXEC_32B	= 1 << 3;
+constexpr unsigned int EXEC_16B	= 0;
+
+constexpr unsigned int LIMIT_4K		= 1 << 4;
+constexpr unsigned int LIMIT_BYTES	= 0;
 
 //Possible values for the field S in segment descriptor
 //These constants should not be use direcly, there are used in the *_SEGMENT_T enums
@@ -19,18 +27,11 @@ constexpr unsigned int PRIVILEGE1 = 1;
 constexpr unsigned int PRIVILEGE2 = 2;
 constexpr unsigned int PRIVILEGE3 = 3;
 
-extern "C" 
-{
-    void __attribute__((fastcall)) switch_idt (const unsigned int idtr_addr);
-    void __attribute__((fastcall)) switch_gdt (const unsigned int gdtr_addr);
-}
-
 /**
  * In this namespace any i386 architecture feature will be implemented
  * */
 namespace ARCH::I386
 {
-    using descriptor_t    = uint64_t;
 
     struct Register
     {
@@ -38,35 +39,11 @@ namespace ARCH::I386
         uint32_t base;
     }__attribute__((packed));
 
-    struct SegmentDescriptor
-    {
-        uint16_t segment_limit_1;
-        uint16_t base_address_1;
-        uint8_t  base_address_2;
-        uint8_t  type:5;
-        uint8_t  access:3;
-        uint8_t  segment_limit_2:4;
-        uint8_t  other:4;
-        uint8_t  base_address_3;
-    }__attribute__((packed));
-
-    struct I_TGateDescriptor
-    {
-        uint16_t offset_1;
-        uint16_t segment_selector;
-        uint16_t :5, it:8, access:3;//First 5 bits are reserved and it = 0x70 for interrupt gate and 0x78 for trap gate
-                                    //The D field (bit 11) is always set to 1 for 32bits trap/interrupt gate
-        uint16_t offset_2;
-    }__attribute__((packed));
-
-    //TODO: Update with new PRESENT value
-    struct TaskGateDescriptor
-    {
-        uint16_t :16;
-        uint16_t tss_segment_selector;
-        uint16_t :8, tss_value:5, access:3;
-        uint16_t :16;
-    }__attribute__((packed));
+    struct Descriptor
+	{
+		uint32_t high;
+		uint32_t low;
+	};
 
     enum CODE_DATA_SEGMENT_T
     {
@@ -114,36 +91,13 @@ namespace ARCH::I386
         DS, ES, FS, GS, SS /* There is no CS because cs can't be selected using a move instruction */
     };
 
-    using IDescriptor = I_TGateDescriptor; //Interrupt Gate Descriptor
-    using TDescriptor = I_TGateDescriptor; //Trap Gate Descriptor
-
-    /**
-     * "create_<desriptor types>_descriptor" are a bunch of functions that create the given type of desriptor
-     * base   : base address  of the desriptor
-     * limit  : the limit of the desriptor
-     * type   : the type of the desriptor (5 bits, the type field contains the 4 real type bits plus the S flag)
-     * access : access rights of the desriptor
-     * other  : the flags G, D/B, L and AVL
-     */
-    inline SegmentDescriptor create_segment_descriptor(const uint32_t base, const uint32_t limit, const int type, const int access, const int other)
-    {
-        //Explicite conversion to silent some warnigs
-        return {(uint16_t)(limit & 0xFFFF), (uint16_t)(base & 0xFFFF), (uint8_t)((base & 0xFF0000) >> 16), (uint8_t)type, (uint8_t)access, (uint8_t)((limit & 0xF0000) >> 16), (uint8_t)other, (uint8_t)((base & 0xFF000000) >> 24)};
-    }
-
-    inline IDescriptor create_interruptgate_descriptor (const uint32_t offset, const uint16_t segment_selector, const unsigned int access)
-    {
-        //Explicite conversion to silent some warnings
-        return {(uint16_t)offset, segment_selector, (uint16_t)0x70, (uint16_t)access, (uint16_t)(offset  >> 16)};
-    }
-
-    inline TDescriptor create_trapgate_descriptor (const uint32_t offset, const uint16_t segment_selector, const int access)
+    /*inline TDescriptor create_trapgate_descriptor (const uint32_t offset, const uint16_t segment_selector, const int access)
     {
         //Explicite conversion to silent some warnings
         return {(uint16_t)offset, segment_selector, (uint16_t)0x78, (uint16_t)access, (uint16_t)(offset >> 16)};
     }
 
-    /*inline TaskGateDescriptor create_taskgate_descriptor (const uint16_t tss_segment_selector, const int access)
+    inline TaskGateDescriptor create_taskgate_descriptor (const uint16_t tss_segment_selector, const int access)
     {
         TaskGateDescriptor ret;
         ret.tss_segment_selector = tss_segment_selector;
@@ -153,67 +107,43 @@ namespace ARCH::I386
         return ret;
     }*/
 
-    class Table
-    {
-        public:
-            Table(const uint16_t count, const uint32_t base);
+	class Table
+	{
+		public:
+			unsigned int getCount(void) const;
+			virtual void makeCurrent(void) const = 0;
 
-            void add (const SegmentDescriptor descriptor);
-            void add (const I_TGateDescriptor descriptor);
-            inline unsigned int get_count (void) const { return m_count; }
+		protected:
+			Table(const unsigned int base, const unsigned int count);
+			void add(const Descriptor descriptor);
 
-            virtual void add (const descriptor_t descriptor);
-            virtual void del (void);
-            virtual void update (const uint16_t pos, const descriptor_t new_descriptor);
-            virtual void makeCurrent (void) const = 0;
-        
-        protected:
-            Register m_reg;
-            uint16_t m_count;
-    };
+		protected:
+			Register m_reg;
+			unsigned int m_count;
+	};
 
-    class LDT: public Table
-    {
+	class GDT: public Table
+	{
+		public:
+			GDT(const unsigned int base, const unsigned int count);
 
-    };
+		public:
+			void addSegmentDescriptor(const unsigned int base, const unsigned int limit, const unsigned int type, const unsigned int access, const unsigned int other);
 
-    class GlobalTable: public Table
-    {
-        public:
-            enum class TYPE
-            {
-                GDT, IDT
-            };
+			virtual void makeCurrent(void) const final;
+	};
 
-        public:
-            GlobalTable(const uint16_t count, const uint32_t base): Table(count, base) { }
-            GlobalTable(const GlobalTable&) = delete;//No copy constructor for GlobalTables
-            static void retrieve (const TYPE type, GlobalTable& dest);
-    };
+	class IDT: public Table
+	{
+		public:
+			IDT(const unsigned int base, const unsigned int count);
 
-    class GDT: public GlobalTable
-    {
-        public:
-            GDT(void): GlobalTable(16, 0x7C00)
-            {
-                descriptor_t* gdt = (descriptor_t*)m_reg.base;
-                gdt[m_count++] = 0;//First entry of the gdt is always a null descriptor
-            }
-        
-        public:
-            void select (const SEGMENT_NAMES segment_name, const uint16_t segment_selector, const int rpl);
-            void del () override { (m_count > 2) ? --m_count : m_count; }
-            inline void makeCurrent (void) const final { switch_gdt((int)&m_reg); }
-    };
-
-    class IDT: public GlobalTable
-    {
-        public:
-            IDT(void): GlobalTable(40, 0) { }
-
-            inline void makeCurrent(void) const final { switch_idt((int)&m_reg); }
-    };
-
+		public:
+			void addInterruptGateDescriptor (const unsigned int offset, const unsigned int segment_selector, const unsigned int access, const bool size32 = true);
+		
+		public:
+			virtual void makeCurrent(void) const final;
+	};
 }
 
 #endif
