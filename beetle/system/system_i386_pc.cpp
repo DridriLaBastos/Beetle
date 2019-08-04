@@ -41,6 +41,7 @@ extern "C" void init(void)
 {
 	ARCH::I386::GDT gdt (0x1000,512);
 	ARCH::I386::IDT idt (0x500, 256);
+	ARCH::I386::APIC apic;
 
 	/* Initialize the new GDT */
 	init_gdt(gdt);
@@ -49,6 +50,7 @@ extern "C" void init(void)
 	init_idt(idt);
 
 	idt.makeCurrent();
+	apic.setTimerDivideValue(ARCH::I386::APIC::TIMER_DIVIDE_VALUE::D1);
 }
 
 void init_gdt (ARCH::I386::GDT& gdt)

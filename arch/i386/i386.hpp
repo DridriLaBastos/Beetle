@@ -10,5 +10,6 @@
 #include <stdint.h>
 
 #include "mem.hpp"
+#include "apic.hpp"
 
 #endif
