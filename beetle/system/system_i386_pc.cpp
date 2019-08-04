@@ -99,5 +99,5 @@ void init_idt (ARCH::I386::IDT& idt)
 	idt.addInterruptGateDescriptor((unsigned)interrupt_VE,  0x8, PRESENT | PRIVILEGE0);
 
 	for (unsigned i = idt.getCount(); i < 32; ++i)
-	idt.addInterruptGateDescriptor(0,0x8,NOT_PRESENT);
+		idt.addInterruptGateDescriptor(0,0x8,NOT_PRESENT);
 }
