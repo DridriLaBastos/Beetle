@@ -11,7 +11,8 @@ export LD  = $(PREFIX)ld
 export CXX = $(PREFIX)g++ -m32 -std=c++11
 export LDFLAGS  = -nostdlib -flto --strip-all -melf_i386
 export CPPFLAGS = -nostdinc++ -I$(SRC_DIR)
-export CFLAGS   = -c -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
+export ASFLAGS  = -f elf
+export CFLAGS   = -O3 -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
 export CXXFLAGS = $(CFLAGS) -fno-rtti -fstrict-enums -fno-threadsafe-statics
 
 export TARGET = i386

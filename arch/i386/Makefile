@@ -13,9 +13,6 @@ $(PRODUCT) : $(DEPOBJ) $(OBJ)
 %.d: %.cpp
 	$(CXX) $(DEPFLAGS) $@ $^
 
-%.o: %.s
-	$(AS) -f elf32 $^
-
 .PHONY: clean mrproper
 
 clean:

@@ -1,18 +1,20 @@
 FINAL_OBJ = $(SRC_DIR)/arch/$(TARGET)/$(TARGET).o
 CXXSRC = system/system_$(TARGET)_$(PLATFORM).cpp
+ASSRC  = system/system_$(TARGET)_$(PLATFORM)_main.s
 CXXOBJ = $(CXXSRC:.cpp=.o)
-PRODUCT=libsystem.a
+ASOBJ = $(ASSRC:.s=.o)
 
-$(PRODUCT): $(CXXOBJ) $(FINAL_OBJ)
-	$(AR) rcs $@ $^
+ASFLAGS = -f elf
 
-%.o: %.cpp include/system.hpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+PRODUCT=libsystem.a main.o
+
+$(PRODUCT): $(CXXOBJ) $(ASOBJ)
+	$(AR) rcs $@ $^ $(FINAL_OBJ)
 
 .PHONY: clean mrproper
 
 clean:
-	rm $(CXXOBJ)
+	rm $(CXXOBJ) $(ASOBJ)
 
 mrproper:
 	rm $(PRODUCT)

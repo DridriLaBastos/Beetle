@@ -10,6 +10,9 @@ constexpr unsigned int NOT_PRESENT	= 0;
 constexpr unsigned int EXEC_32B	= 1 << 2;
 constexpr unsigned int EXEC_16B	= 0;
 
+constexpr unsigned int STACK_32B = EXEC_32B;
+constexpr unsigned int STACK_16B = EXEC_16B;
+
 constexpr unsigned int LIMIT_4K		= 1 << 3;
 constexpr unsigned int LIMIT_BYTES	= 0;
 
@@ -125,8 +128,14 @@ namespace ARCH::I386
 
 		public:
 			void addSegmentDescriptor(const unsigned int base, const unsigned int limit, const unsigned int type, const unsigned int access, const unsigned int other);
-
+			void select (const SEGMENT_NAMES segmentName, const unsigned int segNum, const unsigned int rpl);
 			virtual void makeCurrent(void) const final;
+		
+		private:
+			void selectSS(const unsigned int SSDescriptorNum);
+			
+		private:
+			mutable Descriptor m_oldSSDescriptor;
 	};
 
 	class IDT: public Table

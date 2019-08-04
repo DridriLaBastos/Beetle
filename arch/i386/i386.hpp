@@ -9,8 +9,6 @@
 
 #include <stdint.h>
 
-#include "apic.hpp"
-#include "cpuid.hpp"
 #include "mem.hpp"
 
 #endif

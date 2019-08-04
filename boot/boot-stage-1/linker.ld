@@ -1,4 +1,4 @@
-ENTRY(boot_stage_1_main)
+ENTRY(main)
 
 SECTIONS
 {
