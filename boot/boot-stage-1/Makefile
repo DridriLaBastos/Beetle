@@ -1,11 +1,15 @@
-LIB_SYSTEM = $(BEETLE)/libsystem.a
+BOOT_OBJ = $(wildcard boot_$(TARGET)_$(PLATFORM)*.o)
+TARGET_OBJ = $(SRC_DIR)/arch/$(TARGET)/$(TARGET).o
 
-ASSRC	= $(wildcard *.s)
+ASSRC	= $(wildcard *.s) $(wildcard boot_$(TARGET)_$(PLATFORM)/*.s)
+CXXSRC	= $(wildcard boot_$(TARGET)_$(PLATFORM)/*.cpp)
 ASOBJ	= $(ASSRC:.s=.o)
-OBJ		= $(ASOBJ)
+CXXOBJ	= $(CXXSRC:.cpp=.o)
+OBJ		= $(ASOBJ) $(CXXOBJ)
+
 EXEC	= boot-stage-1
 
-$(EXEC): $(OBJ) $(LIB_SYSTEM)
+$(EXEC): $(OBJ) $(BOOT_OBJ) $(TARGET_OBJ)
 	$(LD) $(LDFLAGS) --script=linker.ld $^ -o $@
 
 .PHONY: clean mrproper

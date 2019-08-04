@@ -1,4 +1,4 @@
-TARGET_OBJ = $(SRC_DIR)/arch/$(TARGET)/$(TARGET).o
+
 CXXSRC = system/system_$(TARGET)_$(PLATFORM).cpp
 ASSRC  = system/system_$(TARGET)_$(PLATFORM)_main.s
 CXXOBJ = $(CXXSRC:.cpp=.o)
@@ -7,6 +7,8 @@ ASOBJ = $(ASSRC:.s=.o)
 ASFLAGS = -f elf
 
 PRODUCT=libsystem.a
+
+all:
 
 $(PRODUCT): $(CXXOBJ) $(ASOBJ) $(TARGET_OBJ)
 	$(AR) rcs $@ $^
