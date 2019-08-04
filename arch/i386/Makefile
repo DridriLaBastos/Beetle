@@ -1,11 +1,11 @@
-CXXSRC = $(wildcard *.cpp)
-ASSRC  = $(wildcard *.s)
-CXXOBJ = $(CXXSRC:.cpp=.o)
-ASOBJ  = $(ASSRC:.s=.o)
-DEPFLAGS = -MM -MF
-DEPOBJ   = $(CXXSRC:.cpp=.d)
-OBJ    = $(CXXOBJ) $(ASOBJ)
-PRODUCT = i386.o
+CXXSRC	= $(wildcard *.cpp)
+ASSRC	= $(wildcard *.s)
+CXXOBJ	= $(CXXSRC:.cpp=.o)
+ASOBJ	= $(ASSRC:.s=.o)
+DEPFLAGS	= -MM -MF
+DEPOBJ	= $(CXXSRC:.cpp=.d)
+OBJ		= $(CXXOBJ) $(ASOBJ)
+PRODUCT	= i386.o
 
 $(PRODUCT) : $(DEPOBJ) $(OBJ)
 	$(LD) $(LDFLAGS) --relocatable $(OBJ) -o $(PRODUCT)
@@ -21,4 +21,4 @@ clean:
 mrproper:
 	rm $(PRODUCT)
 
-include $(wildcard $(patsubst %, %.d, $(CXXSRC)))
+include $(wildcard $(DEPOBJ))

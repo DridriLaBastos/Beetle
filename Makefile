@@ -1,26 +1,26 @@
-export SRC_DIR    = $(shell pwd)#sources directories
+export SRC_DIR = $(shell pwd)#sources directories
 export BEETLE = $(SRC_DIR)/beetle
 
 ifeq ($(shell uname -s), Darwin)
 	export PREFIX = i686-elf-
 endif
 
-export AS  = nasm
-export AR = $(PREFIX)ar
-export LD  = $(PREFIX)ld
-export CXX = $(PREFIX)g++ -m32 -std=c++11
-export LDFLAGS  = -nostdlib -flto --strip-all -melf_i386
-export CPPFLAGS = -nostdinc++ -I$(SRC_DIR)
-export ASFLAGS  = -f elf
-export CFLAGS   = -O3 -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
-export CXXFLAGS = $(CFLAGS) -fno-rtti -fstrict-enums -fno-threadsafe-statics
+export AS		= nasm
+export AR		= $(PREFIX)ar
+export LD		= $(PREFIX)ld
+export CXX		= $(PREFIX)g++ -m32 -std=c++11
+export LDFLAGS	= -nostdlib -flto --strip-all -melf_i386
+export CPPFLAGS	= -nostdinc++ -I$(SRC_DIR)
+export ASFLAGS	= -f elf
+export CFLAGS	= -O3 -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
+export CXXFLAGS	= $(CFLAGS) -fno-rtti -fstrict-enums -fno-threadsafe-statics
 
-export TARGET = i386
-export PLATFORM = pc
+export TARGET	= i386
+export PLATFORM	= pc
 
-MAJOR_VERSION = 0
-MINOR_VERSION = 1
-FIX_VERSION   = 2 # 2 implementing the apics functionnality of the 0.1* version
+MAJOR_VERSION	= 0
+MINOR_VERSION	= 1
+FIX_VERSION		= 2 #2 implementing the apics functionnality of the 0.1* version
 
 DIR = arch beetle boot
 DEBUG = 

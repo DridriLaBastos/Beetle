@@ -1,4 +1,3 @@
-#include "beetle/include/system.hpp"
 #include "arch/i386/i386.hpp"
 
 #define DEBUG
@@ -8,36 +7,34 @@
 #define NOP ASM("nop")
 #define HLT ASM("hlt")
 
-using namespace ARCH::I386;
-
-void init_gdt  (GDT& gdt);
-void init_idt  (IDT& idt);
+void init_gdt  (ARCH::I386::GDT& gdt);
+void init_idt  (ARCH::I386::IDT& idt);
 void init_apic (void);
 
 extern "C" 
 {
-	void interrupt_DE   (void);
-	void interrupt_DB   (void);
-	void interrupt_NMI  (void);
-	void interrupt_BP   (void);
-	void interrupt_OF   (void);
-	void interrupt_BR   (void);
-	void interrupt_UP   (void);
-	void interrupt_NM   (void);
-	void interrupt_DF   (void);
-	void interrupt_CSO  (void);
-	void interrupt_TS   (void);
-	void interrupt_NP   (void);
-	void interrupt_SS   (void);
-	void interrupt_GP   (void);
-	void interrupt_PF   (void);
-	void interrupt_IR   (void);
-	void interrupt_MF   (void);
-	void interrupt_AC   (void);
-	void interrupt_MC   (void);
-	void interrupt_XM   (void);
-	void interrupt_VE   (void);
-	void interrupt_IRQ0 (void);
+	void interrupt_DE	(void);
+	void interrupt_DB	(void);
+	void interrupt_NMI	(void);
+	void interrupt_BP	(void);
+	void interrupt_OF	(void);
+	void interrupt_BR	(void);
+	void interrupt_UP	(void);
+	void interrupt_NM	(void);
+	void interrupt_DF	(void);
+	void interrupt_CSO	(void);
+	void interrupt_TS	(void);
+	void interrupt_NP	(void);
+	void interrupt_SS	(void);
+	void interrupt_GP	(void);
+	void interrupt_PF	(void);
+	void interrupt_IR	(void);
+	void interrupt_MF	(void);
+	void interrupt_AC	(void);
+	void interrupt_MC	(void);
+	void interrupt_XM	(void);
+	void interrupt_VE	(void);
+	void interrupt_IRQ0	(void);
 }
 
 extern "C" void init(void)

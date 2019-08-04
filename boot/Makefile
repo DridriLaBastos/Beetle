@@ -1,4 +1,3 @@
-#Very complicated makefile...
 all:
 	$(MAKE) -C boot-stage-1
 
