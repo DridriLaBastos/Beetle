@@ -121,6 +121,7 @@ namespace ARCH::I386
 			unsigned int m_count;
 	};
 
+
 	class GDT: public Table
 	{
 		public:

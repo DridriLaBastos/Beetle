@@ -5,10 +5,10 @@ ASOBJ	= $(ASSRC:.s=.o)
 DEPFLAGS	= -MM -MF
 DEPOBJ	= $(CXXSRC:.cpp=.d)
 OBJ		= $(CXXOBJ) $(ASOBJ)
-PRODUCT	= i386.o
+PRODUCT	= lib$(TARGET).a
 
 $(PRODUCT) : $(DEPOBJ) $(OBJ)
-	$(LD) $(LDFLAGS) --relocatable $(OBJ) -o $(PRODUCT)
+	$(AR) -vrus $@ $(OBJ)
 
 %.d: %.cpp
 	$(CXX) $(DEPFLAGS) $@ $^

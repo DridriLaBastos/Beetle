@@ -18,9 +18,11 @@ export CXXFLAGS	= $(CFLAGS) -fno-rtti -fstrict-enums -fno-threadsafe-statics
 export TARGET	= i386
 export PLATFORM	= pc
 
-MAJOR_VERSION	= 0
-MINOR_VERSION	= 1
-FIX_VERSION		= 2 #2 implementing the apics functionnality of the 0.1* version
+export MAJOR_VERSION	= 0
+export MINOR_VERSION	= 1
+export FIX_VERSION		= 2 #2 implementing the apics functionnality of the 0.1* version
+
+export GRUB_TARGET=i386-pc
 
 DIR = arch beetle boot
 DEBUG = 
@@ -32,7 +34,7 @@ endif
 
 BOCHS = $(BOCHS_PREFIX)bochs
 
-.PHONY: all $(DIR) clean mrproper distclean rebuild
+.PHONY: all $(DIR) clean mrproper distclean rebuild iso
 
 all: $(DIR)
 
@@ -42,11 +44,10 @@ $(DIR):
 boot: beetle
 beetle: arch
 
-iso: boot/boot-stage-1/boot-stage-1
+iso: beetle.iso
+beetle.iso: boot/boot-stage-1/boot-stage-1
 	@mkdir -p iso/boot/grub
-	@echo menuentry \"Beetle$(MAJOR_VERSION).$(MINOR_VERSION).$(FIX_VERSION)\" { > iso/boot/grub/grub.cfg
-	@echo "    multiboot /boot/boot-stage-1" >> iso/boot/grub/grub.cfg
-	@echo } >> iso/boot/grub/grub.cfg
+	@sh build-grubconfig.sh
 	@cp -f $^ iso/boot/
 	@grub-mkrescue -o beetle.iso iso
 

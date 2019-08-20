@@ -37,7 +37,7 @@ extern "C"
 	void interrupt_IRQ0	(void);
 }
 
-extern "C" void init(void)
+extern "C" void init(const unsigned int multibootInfoStructureAddr)
 {
 	ARCH::I386::GDT gdt (0x1000,512);
 	ARCH::I386::IDT idt (0x500, 256);
