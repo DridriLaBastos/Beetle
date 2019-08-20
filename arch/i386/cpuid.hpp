@@ -3,7 +3,7 @@
 
 #include "stdint.h"
 
-namespace ARCH::I386::CPUID
+namespace ARCH {namespace I386 {namespace CPUID
 {
 	struct AnswerStruct
 	{
@@ -14,6 +14,6 @@ namespace ARCH::I386::CPUID
 	};
 	
 	AnswerStruct function (const unsigned int functionNumber);
-};
+}}};
 
-#endif //CPUID_HPP
+#endif //CPUID_HPP‡

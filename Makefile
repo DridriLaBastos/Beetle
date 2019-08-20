@@ -22,8 +22,6 @@ export MAJOR_VERSION	= 0
 export MINOR_VERSION	= 1
 export FIX_VERSION		= 2 #2 implementing the apics functionnality of the 0.1* version
 
-export GRUB_TARGET=i386-pc
-
 DIR = arch beetle boot
 DEBUG = 
 BOCHS_PREFIX = 

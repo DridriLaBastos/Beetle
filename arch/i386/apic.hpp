@@ -3,7 +3,7 @@
 
 #include "stdint.h"
 
-namespace ARCH::I386
+namespace ARCH {namespace I386
 {
 	class APIC
 	{
@@ -25,6 +25,6 @@ namespace ARCH::I386
 		private:
 			volatile uint32_t* m_apicRegistersPTR;
 	};
-}
+}}
 
 #endif
