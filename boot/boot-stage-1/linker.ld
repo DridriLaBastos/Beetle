@@ -1,10 +1,10 @@
-ENTRY(boot_stage_1_main)
+ENTRY(main)
 
 SECTIONS
 {
 	. = 1M;
 	
-	.header : {
+	.header ALIGN(8K) : {
 		*(.multiboot_header)
 		*(.interrupt)
 	}

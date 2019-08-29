@@ -1,20 +1,26 @@
-export SRC_DIR    = $(shell pwd)#sources directories
+export SRC_DIR = $(shell pwd)#sources directories
 export BEETLE = $(SRC_DIR)/beetle
-export PREFIX = i686-elf-
-export AS  = nasm
-export AR = $(PREFIX)ar
-export LD  = $(PREFIX)ld
-export CXX = $(PREFIX)g++
-export LDFLAGS  = -nostdlib
-export CPPFLAGS =  -nostdinc++ -I$(SRC_DIR)
-export CFLAGS   = -c -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
-export CXXFLAGS = $(CFLAGS) -fno-rtti   
 
-export TARGET = i386
+ifeq ($(shell uname -s), Darwin)
+	export PREFIX = i686-elf-
+endif
 
-MAJOR_VERSION = 0
-MINOR_VERSION = 1
-FIX_VERSION   = 1
+export AS		= nasm
+export AR		= $(PREFIX)ar
+export LD		= $(PREFIX)ld
+export CXX		= $(PREFIX)g++ -m32 -std=c++11
+export LDFLAGS	= -nostdlib -flto --strip-all -melf_i386
+export CPPFLAGS	= -nostdinc++ -I$(SRC_DIR)
+export ASFLAGS	= -f elf
+export CFLAGS	= -O3 -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
+export CXXFLAGS	= $(CFLAGS) -fno-rtti -fstrict-enums -fno-threadsafe-statics
+
+export TARGET	= i386
+export PLATFORM	= pc
+
+export MAJOR_VERSION	= 0
+export MINOR_VERSION	= 1
+export FIX_VERSION		= 2 #2 implementing the apics functionnality of the 0.1* version
 
 DIR = arch beetle boot
 DEBUG = 
@@ -26,14 +32,20 @@ endif
 
 BOCHS = $(BOCHS_PREFIX)bochs
 
-all:
-	@for i in $(DIR); do $(MAKE) -C $$i; echo; done
+.PHONY: all $(DIR) clean mrproper distclean rebuild iso
 
-iso: boot/boot-stage-1/boot-stage-1
+all: $(DIR)
+
+$(DIR):
+	$(MAKE) -C $@
+
+boot: beetle
+beetle: arch
+
+iso: beetle.iso
+beetle.iso: boot/boot-stage-1/boot-stage-1
 	@mkdir -p iso/boot/grub
-	@echo menuentry \"Beetle$(MAJOR_VERSION).$(MINOR_VERSION).$(FIX_VERSION)\" { > iso/boot/grub/grub.cfg
-	@echo "    multiboot /boot/boot-stage-1" >> iso/boot/grub/grub.cfg
-	@echo } >> iso/boot/grub/grub.cfg
+	@sh build-grubconfig.sh
 	@cp -f $^ iso/boot/
 	@grub-mkrescue -o beetle.iso iso
 
@@ -42,8 +54,6 @@ run:
 
 drun:
 	@$(MAKE) run DEBUG=1
-
-.PHONY: clean mrproper distclean rebuild
 
 clean:
 	@for i in $(DIR); do $(MAKE) -C $$i clean; done

@@ -1,19 +1,17 @@
-CXXSRC = $(wildcard *.cpp)
-CXXHEADERS = $(wildcard *.hpp)
-ASSRC  = $(wildcard *.s)
-CXXOBJ = $(CXXSRC:.cpp=.o)
-ASOBJ  = $(ASSRC:.s=.o)
-OBJ    = $(CXXOBJ) $(ASOBJ)
-PRODUCT = i386.o
+CXXSRC	= $(wildcard *.cpp)
+ASSRC	= $(wildcard *.s)
+CXXOBJ	= $(CXXSRC:.cpp=.o)
+ASOBJ	= $(ASSRC:.s=.o)
+DEPFLAGS	= -MM -MF
+DEPOBJ	= $(CXXSRC:.cpp=.d)
+OBJ		= $(CXXOBJ) $(ASOBJ)
+PRODUCT	= lib$(TARGET).a
 
-$(PRODUCT) : $(OBJ)
-	$(LD) $(LDFLAGS) --relocatable $^ -o $(PRODUCT)
-	
-%.o: %.cpp $(CXXHEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fno-exceptions $< -o $@
+$(PRODUCT) : $(DEPOBJ) $(OBJ)
+	$(AR) -vrus $@ $(OBJ)
 
-%.o: %.s
-	$(AS) -f elf32 $^
+%.d: %.cpp
+	$(CXX) $(DEPFLAGS) $@ $^
 
 .PHONY: clean mrproper
 
@@ -22,3 +20,5 @@ clean:
 
 mrproper:
 	rm $(PRODUCT)
+
+include $(wildcard $(DEPOBJ))

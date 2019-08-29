@@ -1,19 +1,17 @@
-CXXSRC = $(wildcard *.cpp)
-ASSRC  = $(wildcard *.s)
-CPPFLAGS := $(CPPFLAGS)
-CXXOBJ = $(CXXSRC:.cpp=.o)
-ASOBJ  = $(ASSRC:.s=.o)
-OBJ    = $(CXXOBJ) $(ASOBJ)
-EXEC   = boot-stage-1
+TARGET_LIB = $(SRC_DIR)/arch/$(TARGET)/lib$(TARGET).a
 
-$(EXEC): $(OBJ) $(BEETLE)/libsystem.a
-	$(LD) $(LDFLAGS) --script=linker.ld $(OBJ) $(BEETLE)/libsystem.a -o $@
+ASSRC	= $(wildcard *.s) $(wildcard boot_$(TARGET)_$(PLATFORM)/*.s)
+CXXSRC	= $(wildcard boot_$(TARGET)_$(PLATFORM)/*.cpp)
+ASOBJ	= $(ASSRC:.s=.o)
+CXXOBJ	= $(CXXSRC:.cpp=.o)
+LDFLAGS += -L$(SRC_DIR)/arch/$(TARGET)
 
-%.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@
+OBJ		= $(ASOBJ) $(CXXOBJ)
 
-%.o: %.s
-	$(AS) -f elf32 $^
+EXEC	= boot-stage-1
+
+$(EXEC): $(OBJ) $(TARGET_LIB)
+	$(LD) $(LDFLAGS) --script=linker.ld $(OBJ) -l $(TARGET) -o $@
 
 .PHONY: clean mrproper
 
