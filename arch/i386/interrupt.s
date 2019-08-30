@@ -4,14 +4,15 @@
 
 %macro INTERRUPT 2
 global interrupt_%1
-    interrupt_%1:
-        mov al, '('
-        call disp
-        mov eax, %2
-        call dispn
-        mov al, ')'
-        call disp
-        iretd
+	interrupt_%1:
+		xchg bx, bx
+		mov al, '('
+		call disp
+		mov eax, %2
+		call dispn
+		mov al, ')'
+		call disp
+		iretd
 %endmacro
 
 SECTION .header
@@ -39,36 +40,36 @@ INTERRUPT VE, 20
 
 ;puts the ascii code inside al into the VGA RAM
 disp:
-    pusha
-    mov ah, 0xC
-    mov ebx, [pos]
-    mov word [0xB8000 + ebx * 2], ax
-    inc dword [pos]
-    popa
-    ret
+	pusha
+	mov ah, 0xC
+	mov ebx, [pos]
+	mov word [0xB8000 + ebx * 2], ax
+	inc dword [pos]
+	popa
+	ret
 
 ;displays the number inside eax
 global dispn
 dispn:
-    pusha
-    mov ebx, 10
-    xor ecx, ecx
-    .start:
-        xor edx, edx
-        div ebx
-        push edx
-        inc ecx
-        cmp eax, 0
-        jz .next
-        jmp .start
-    
-    .next:
-        pop eax
-        add eax, '0'
-        call disp
-        loop .next
-        popa
-        ret
+	pusha
+	mov ebx, 10
+	xor ecx, ecx
+	.start:
+		xor edx, edx
+		div ebx
+		push edx
+		inc ecx
+		cmp eax, 0
+		jz .next
+		jmp .start
+		
+	.next:
+		pop eax
+		add eax, '0'
+		call disp
+		loop .next
+		popa
+		ret
 
 SECTION .data
-    pos: dd 0
+	pos: dd 0
