@@ -1,3 +1,5 @@
+#include "beetle/include/mm.hpp"
+#include "beetle/include/process.hpp"
 #include "arch/i386/i386.hpp"
 
 #define DEBUG
@@ -10,6 +12,7 @@
 void init_gdt  (ARCH::I386::GDT& gdt);
 void init_idt  (ARCH::I386::IDT& idt);
 void init_apic (void);
+void init_mm   (void);
 
 extern "C" 
 {
@@ -49,7 +52,9 @@ extern "C" void init(const unsigned int multibootInfoStructureAddr)
 	/* Initialize the new IDT */
 	init_idt(idt);
 
-	idt.makeCurrent();
+	/* Initialize the memory manager */
+	//init_mm();
+
 	apic.setTimerDivideValue(ARCH::I386::APIC::TIMER_DIVIDE_VALUE::D1);
 }
 
@@ -102,4 +107,6 @@ void init_idt (ARCH::I386::IDT& idt)
 
 	for (unsigned i = idt.getCount(); i < 32; ++i)
 		idt.addInterruptGateDescriptor(0,0x8,NOT_PRESENT);
+	
+	idt.makeCurrent();
 }
