@@ -1,4 +1,5 @@
-#include "include/mm.hpp"
+#define BEETLE_MM
+#include "beetle.hpp"
 
 //TODO: implement this properly
 void memcpy (const uint8_t* const src, uint8_t* const dest, const unsigned int count)
@@ -24,8 +25,8 @@ namespace BEETLE
 		//in place at 2MB
 		if (m_firstMemoryBlockPtr == nullptr)
 		{
-			createdMemoryBlockPtr->next = nullptr;
 			createdMemoryBlockPtr->previous = nullptr;
+			createdMemoryBlockPtr->next = nullptr;
 			createdMemoryBlockPtr->size = byteNumberToAllocate;
 
 			m_firstMemoryBlockPtr = createdMemoryBlockPtr;
@@ -48,16 +49,22 @@ namespace BEETLE
 			}
 
 			//When a space in RAM is found, it is used and the doubly linked list is updated
-			createdMemoryBlockPtr = currentMemoryBlockInfo + sizeof(MemoryBlockInfo) + currentMemoryBlockInfo->size;
-			createdMemoryBlockPtr->next = currentMemoryBlockInfo->next;
+			const unsigned long createdMemoryblockAddr = (unsigned long)currentMemoryBlockInfo + sizeof(MemoryBlockInfo) + currentMemoryBlockInfo->size;
+			createdMemoryBlockPtr =  (MemoryBlockInfo*)createdMemoryblockAddr;
 			createdMemoryBlockPtr->previous = currentMemoryBlockInfo;
 
-			currentMemoryBlockInfo->next->previous = currentMemoryBlockInfo;
+			if (currentMemoryBlockInfo->next != nullptr)
+			{
+				createdMemoryBlockPtr->next = currentMemoryBlockInfo->next;
+				createdMemoryBlockPtr->next->previous = createdMemoryBlockPtr;
+			}
+
+			currentMemoryBlockInfo->next = createdMemoryBlockPtr;
 
 			createdMemoryBlockPtr->size = byteNumberToAllocate;
 		}
 
-		return (uint8_t*)(createdMemoryBlockPtr + sizeof(MemoryBlockInfo));
+		return (uint8_t*)createdMemoryBlockPtr + sizeof(MemoryBlockInfo);
 	}
 
 	//TODO: check if the pointer being used was allocated or not

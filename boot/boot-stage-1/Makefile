@@ -1,4 +1,4 @@
-TARGET_LIB = $(SRC_DIR)/arch/$(TARGET)/lib$(TARGET).a
+TARGET_LIB = $(SRC_DIR)/arch/$(TARGET)/lib$(TARGET).a $(SRC_DIR)/beetle/libbeetle.a
 
 ASSRC	= $(wildcard *.s) $(wildcard boot_$(TARGET)_$(PLATFORM)/*.s)
 CXXSRC	= $(wildcard boot_$(TARGET)_$(PLATFORM)/*.cpp)

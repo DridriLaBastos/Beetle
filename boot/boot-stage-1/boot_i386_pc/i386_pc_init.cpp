@@ -1,13 +1,6 @@
-#include "beetle/include/mm.hpp"
-#include "beetle/include/process.hpp"
+#define BEETLE_MM
+#include "beetle/beetle.hpp"
 #include "arch/i386/i386.hpp"
-
-#define DEBUG
-
-#define ASM(a) __asm__ volatile (a)
-
-#define NOP ASM("nop")
-#define HLT ASM("hlt")
 
 void init_gdt  (ARCH::I386::GDT& gdt);
 void init_idt  (ARCH::I386::IDT& idt);
@@ -48,7 +41,7 @@ extern "C"
  * 	Load a disk driver with the Module from GRUB
  * 	Load an init stage 2 program
  */
-//TODO: move the memory management thing in boot stage 2
+//TODO: move the memory management thing in boot stage 2 ?
 extern "C" void init(const unsigned int multibootInfoStructureAddr)
 {
 	ARCH::I386::GDT gdt (0x1000,512);
@@ -62,8 +55,6 @@ extern "C" void init(const unsigned int multibootInfoStructureAddr)
 	init_idt(idt);
 
 	BEETLE::MemoryManager mm;
-
-	apic.setTimerDivideValue(ARCH::I386::APIC::TIMER_DIVIDE_VALUE::D1);
 }
 
 void init_gdt (ARCH::I386::GDT& gdt)
