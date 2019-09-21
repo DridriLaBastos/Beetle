@@ -12,7 +12,6 @@
 void init_gdt  (ARCH::I386::GDT& gdt);
 void init_idt  (ARCH::I386::IDT& idt);
 void init_apic (void);
-void init_mm   (void);
 
 extern "C" 
 {
@@ -40,6 +39,16 @@ extern "C"
 	void interrupt_IRQ0	(void);
 }
 
+/**
+ * //TODO: system call must be implemented somewheres
+ * Initialization sequence :
+ * 	Init CPU core features (GDT/LDT/IDT/paging)
+ * 	Init early memory management (malloc and other will be implemented in a process)
+ * 	Init process management
+ * 	Load a disk driver with the Module from GRUB
+ * 	Load an init stage 2 program
+ */
+//TODO: move the memory management thing in boot stage 2
 extern "C" void init(const unsigned int multibootInfoStructureAddr)
 {
 	ARCH::I386::GDT gdt (0x1000,512);
@@ -52,8 +61,7 @@ extern "C" void init(const unsigned int multibootInfoStructureAddr)
 	/* Initialize the new IDT */
 	init_idt(idt);
 
-	/* Initialize the memory manager */
-	//init_mm();
+	BEETLE::MemoryManager mm;
 
 	apic.setTimerDivideValue(ARCH::I386::APIC::TIMER_DIVIDE_VALUE::D1);
 }

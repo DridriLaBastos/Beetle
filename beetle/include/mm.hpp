@@ -12,16 +12,22 @@ namespace BEETLE
 	class MemoryManager
 	{
 		public:
+			//TODO: add a way to free the memory even if the processus that created it didn't
+			struct MemoryBlockInfo
+			{
+				MemoryBlockInfo* previous;	//When previous = nullptr, this the first allocated block
+				MemoryBlockInfo* next;		//When next = nullptr, this is the last allocated block
+				unsigned long size;			//Size of the allocated block
+			};
+
+		public:
 			MemoryManager();
 
-			uint8_t* allocate (const unsigned int pageNumber = 1);
-			void free (const unsigned pageIndex, const unsigned int pageNumberToFree = 1);
-
-		private:
-			uint8_t* m_usedChunksMap;
+			uint8_t* allocate (const unsigned int byteNumberToAllocate);
+			void free (const uint8_t* HeapAllocatedPtr);
 		
 		private:
-			const unsigned int m_totalNumberOfPages = 0x10000;
+			MemoryBlockInfo* m_firstMemoryBlockPtr;
 	};
 }
 

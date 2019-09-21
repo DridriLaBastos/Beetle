@@ -1,4 +1,5 @@
 #!/bin/sh
+#This script is called from the main makefile where the value *VERSION are defined
 echo menuentry \"Beetle$MAJOR_VERSION.$MINOR_VERSION.$FIX_VERSION\" { > iso/boot/grub/grub.cfg
 echo "		multiboot /boot/boot-stage-1" >> iso/boot/grub/grub.cfg
 echo "		module \${prefix}/\${grub_cpu}-\${grub_platform}/elf.mod" >> iso/boot/grub/grub.cfg
