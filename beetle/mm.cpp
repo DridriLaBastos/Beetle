@@ -34,7 +34,7 @@ namespace BEETLE
 		else
 		{
 			//TODO: handle end of memory
-			//If memory has been allocated the function goes throw all the block to search for either:
+			//If memory has been allocated the function goes through all the block to search for either:
 			// * a space between two blocks were asked memory can be puts
 			// * the block the last allocated block (the block which has the next pointer to null)
 			MemoryBlockInfo* currentMemoryBlockInfo = m_firstMemoryBlockPtr;
