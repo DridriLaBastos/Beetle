@@ -1,6 +1,7 @@
 #define BEETLE_MM
 #include "beetle/beetle.hpp"
 #include "arch/i386/i386.hpp"
+#include "vga_pc.hpp"
 
 void init_gdt  (ARCH::I386::GDT& gdt);
 void init_idt  (ARCH::I386::IDT& idt);
@@ -47,6 +48,8 @@ extern "C" void init(const unsigned int multibootInfoStructureAddr)
 	ARCH::I386::GDT gdt (0x1000,512);
 	ARCH::I386::IDT idt (0x500, 256);
 	ARCH::I386::APIC apic;
+	VGA vga;
+
 
 	/* Initialize the new GDT */
 	init_gdt(gdt);
@@ -55,6 +58,7 @@ extern "C" void init(const unsigned int multibootInfoStructureAddr)
 	init_idt(idt);
 
 	BEETLE::MemoryManager mm;
+	vga.puts("BEETLE - Boot Stage 1\n...");
 }
 
 void init_gdt (ARCH::I386::GDT& gdt)
