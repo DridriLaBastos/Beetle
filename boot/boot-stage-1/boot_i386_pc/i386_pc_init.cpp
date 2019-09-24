@@ -1,4 +1,5 @@
 #define BEETLE_MM
+#define BEETLE_MB
 #include "beetle/beetle.hpp"
 #include "arch/i386/i386.hpp"
 #include "vga_pc.hpp"
@@ -43,7 +44,7 @@ extern "C"
  * 	Load an init stage 2 program
  */
 //TODO: move the memory management thing in boot stage 2 ?
-extern "C" void init(const unsigned int multibootInfoStructureAddr)
+extern "C" void init(const unsigned int multibootInfoDataStructPtr)
 {
 	ARCH::I386::GDT gdt (0x1000,512);
 	ARCH::I386::IDT idt (0x500, 256);
@@ -58,7 +59,42 @@ extern "C" void init(const unsigned int multibootInfoStructureAddr)
 	init_idt(idt);
 
 	BEETLE::MemoryManager mm;
-	vga.puts("BEETLE - Boot Stage 1\n...");
+	vga.puts("BEETLE - Boot Stage 1\n");
+
+	BEETLE::MULTIBOOT::MultibootHelper mh (multibootInfoDataStructPtr);
+
+	/*if (mh.isFlagSet(BEETLE::MULTIBOOT::MultibootHelper::MODULE))
+	{
+		BEETLE::MULTIBOOT::ModuleInfo* moduleInfo = nullptr;
+		while ((moduleInfo = mh.getNextModuleInfoStruct()) != nullptr)
+		{
+			vga.puts(moduleInfo->modString);	vga.putc('\n');
+		}
+	}
+	else
+	{
+		//Error: we need multiboot module to continue the boot process
+	}*/
+
+	if (mh.getBootmoduleCount() == 0)
+	{
+		vga.puts("ERROR: the needed modules weren't loaded");
+	}
+	else
+	{
+		BEETLE::MULTIBOOT::ModuleInfo* mi = mh.getNextModuleInfoStruct();
+		mh.getNextModuleInfoStruct();
+
+		if (mi != nullptr)
+		{
+			uint8_t* elfData = (uint8_t*)mi->modStart;
+			vga.putc(elfData[1]); vga.putc(elfData[2]); vga.putc(elfData[3]); vga.putc('\n');
+		}
+		else
+		{
+			vga.puts("ERROR: Module needed not loaded\n");
+		}
+	}
 }
 
 void init_gdt (ARCH::I386::GDT& gdt)
