@@ -51,7 +51,6 @@ extern "C" void init(const unsigned int multibootInfoDataStructPtr)
 	ARCH::I386::APIC apic;
 	VGA vga;
 
-
 	/* Initialize the new GDT */
 	init_gdt(gdt);
 
@@ -63,37 +62,22 @@ extern "C" void init(const unsigned int multibootInfoDataStructPtr)
 
 	BEETLE::MULTIBOOT::MultibootHelper mh (multibootInfoDataStructPtr);
 
-	/*if (mh.isFlagSet(BEETLE::MULTIBOOT::MultibootHelper::MODULE))
+	if (mh.isFlagSet(BEETLE::MULTIBOOT::MultibootHelper::MODULE))
 	{
 		BEETLE::MULTIBOOT::ModuleInfo* moduleInfo = nullptr;
 		while ((moduleInfo = mh.getNextModuleInfoStruct()) != nullptr)
 		{
-			vga.puts(moduleInfo->modString);	vga.putc('\n');
+			if (moduleInfo->modString[0] == '\0')
+				vga.puts("No string associated with this module");
+			else
+				vga.puts(moduleInfo->modString);
+			
+			vga.putc('\n');
 		}
 	}
 	else
 	{
 		//Error: we need multiboot module to continue the boot process
-	}*/
-
-	if (mh.getBootmoduleCount() == 0)
-	{
-		vga.puts("ERROR: the needed modules weren't loaded");
-	}
-	else
-	{
-		BEETLE::MULTIBOOT::ModuleInfo* mi = mh.getNextModuleInfoStruct();
-		mh.getNextModuleInfoStruct();
-
-		if (mi != nullptr)
-		{
-			uint8_t* elfData = (uint8_t*)mi->modStart;
-			vga.putc(elfData[1]); vga.putc(elfData[2]); vga.putc(elfData[3]); vga.putc('\n');
-		}
-		else
-		{
-			vga.puts("ERROR: Module needed not loaded\n");
-		}
 	}
 }
 

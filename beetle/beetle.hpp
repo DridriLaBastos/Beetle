@@ -5,23 +5,23 @@
 
 #if defined BEETLE_MM
 	#undef ALL
-	#include "include/mm.hpp"
+	#include "beetle/mm.hpp"
 #endif
 
 #if defined BEETLE_PM
 	#undef ALL
-	#include "include/process.hpp"
+	#include "beetle/process.hpp"
 #endif
 
 #if defined BEETLE_MB
 	#undef ALL
-	#include "include/multiboot.hpp"
+	#include "beetle/multiboot.hpp"
 #endif
 
 #if defined ALL
-	#include "include/mm.hpp"
-	#include "include/process.hpp"
-	#include "include/multiboot.hpp"
+	#include "beetle/mm.hpp"
+	#include "beetle/process.hpp"
+	#include "beetle/multiboot.hpp"
 #endif
 
 #define DEBUG

@@ -2,4 +2,4 @@ ata0-master: type=cdrom, path=beetle.iso, status=inserted
 boot: cdrom
 cpu: model= bx_generic, reset_on_triple_fault=true
 log: BeetleOS.log
-magic_break: enabled=0
+magic_break: enabled=1

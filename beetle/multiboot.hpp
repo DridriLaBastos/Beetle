@@ -10,7 +10,7 @@ namespace BEETLE {namespace MULTIBOOT {
 		void* modEnd;
 		const char* modString;
 		uint32_t :32;//Reserved field
-	} __attribute__((packed));
+	} __attribute__((packed));//I don't really like using this but it permet to use compiler arithmetic to compute addresses
 
 	class MultibootHelper
 	{
@@ -29,6 +29,7 @@ namespace BEETLE {namespace MULTIBOOT {
 			bool isFlagSet (const unsigned int flag) const { return (m_flags & flag) == flag;}
 			unsigned int getBootmoduleCount(void) const { return m_multibootInfoStructPtr[5]; }
 			ModuleInfo* getNextModuleInfoStruct (void);
+			ModuleInfo* getModuleInfoStructForModuleNumber (const unsigned int moduleNumber) const;
 
 		private:
 			const uint32_t* m_multibootInfoStructPtr;

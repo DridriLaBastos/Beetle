@@ -16,6 +16,5 @@ void ARCH::I386::APIC::setTimerDivideValue(const ARCH::I386::APIC::TIMER_DIVIDE_
 {
 	const unsigned int timerDivideValueIntValue = static_cast<unsigned int>(timerDivideValue);
 	const unsigned int timerDivideValueToWrite = ((timerDivideValueIntValue & 0b100) << 1) | (timerDivideValueIntValue & 0b11);
-	asm("xchg %bx, %bx");
 	write32bitsRegister(62, timerDivideValueToWrite);
 }

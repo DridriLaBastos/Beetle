@@ -1,5 +1,4 @@
-#define BEETLE_MM
-#include "beetle.hpp"
+#include "../mm.hpp"
 
 //TODO: implement this properly
 void memcpy (const uint8_t* const src, uint8_t* const dest, const unsigned int count)
