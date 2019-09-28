@@ -67,11 +67,9 @@ extern "C" void init(const unsigned int multibootInfoDataStructPtr)
 		BEETLE::MULTIBOOT::ModuleInfo* moduleInfo = nullptr;
 		while ((moduleInfo = mh.getNextModuleInfoStruct()) != nullptr)
 		{
-			if (moduleInfo->modString[0] == '\0')
-				vga.puts("No string associated with this module");
-			else
-				vga.puts(moduleInfo->modString);
-			
+			vga.putc(((uint8_t*)(moduleInfo->modStart))[0]);
+			vga.putc(((uint8_t*)(moduleInfo->modStart))[1]);
+			vga.putc(((uint8_t*)(moduleInfo->modStart))[2]);
 			vga.putc('\n');
 		}
 	}

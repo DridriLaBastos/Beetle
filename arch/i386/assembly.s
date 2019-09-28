@@ -5,7 +5,6 @@ global %1
 %1:
 %endmacro
 
-
 SECTION .text
 ;ecx : cpuid function to call
 ;edx : addres of the CPUIDResult structur to fill
@@ -52,6 +51,24 @@ FUNCTION getCurrentSSDescriptorHigh
 	mov ax, ss
 	mov eax, [ebx + eax + 4]
 	pop ebx
+	ret
+
+;bunch of functions to write value to an I/O port. Those functions use the fastcall ABI:
+;	ecx --> adress of the data to write
+;	edx --> port number
+FUNCTION outb
+	mov esi, ecx
+	outsb
+	ret
+
+FUNCTION outw
+	mov esi, ecx
+	outsw
+	ret
+
+FUNCTION outd
+	mov esi, ecx
+	outsd
 	ret
 
 section .data

@@ -9,7 +9,7 @@ export AS		= nasm
 export AR		= $(PREFIX)ar
 export LD		= $(PREFIX)ld
 export CXX		= $(PREFIX)g++ -m32 -std=c++11
-export LDFLAGS	= -nostdlib -flto --strip-all -melf_i386
+export LDFLAGS	= -nostdlib --strip-all -melf_i386
 export CPPFLAGS	= -nostdinc++ -I$(SRC_DIR)
 export ASFLAGS	= -f elf
 export CFLAGS	= -O3 -ffreestanding -mtune=generic -march=i386 -Wall -Wextra
