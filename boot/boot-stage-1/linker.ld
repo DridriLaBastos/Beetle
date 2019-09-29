@@ -4,7 +4,7 @@ SECTIONS
 {
 	. = 1M;
 	
-	.header ALIGN(8K) : {
+	.header ALIGN(4K) : {
 		*(.multiboot_header)
 		*(.interrupt)
 	}

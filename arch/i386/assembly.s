@@ -5,7 +5,6 @@ global %1
 %1:
 %endmacro
 
-
 SECTION .text
 ;ecx : cpuid function to call
 ;edx : addres of the CPUIDResult structur to fill
@@ -52,6 +51,44 @@ FUNCTION getCurrentSSDescriptorHigh
 	mov ax, ss
 	mov eax, [ebx + eax + 4]
 	pop ebx
+	ret
+
+;bunch of functions to write value to an I/O port. Those functions use the fastcall ABI:
+;	ecx --> data to write
+;	edx --> port number
+FUNCTION outb
+	mov eax, ecx
+	out dx, al
+	ret
+
+FUNCTION outw
+	mov eax, ecx
+	out dx, ax
+	ret
+
+FUNCTION outd
+	mov eax, ecx
+	out dx, eax
+	ret
+
+;TODO: find if there is an ABI that permit with gcc to directly pass the first parameter into edx
+;bunch of functions to read data to an I/O port. Those functions uses the thiscall ABI:
+;	ecx --> port number to read
+FUNCTION inb
+	mov edx, ecx
+	in al, dx
+	and eax, 0xFF
+	ret
+
+FUNCTNION inw
+	mov edx, ecx
+	in ax, dx
+	and eax, 0xFFFF
+	ret
+
+FUNCTNION ind
+	mov edx, ecx
+	in eax, dx
 	ret
 
 section .data

@@ -1,11 +1,8 @@
+#define BEETLE_MM
+#define BEETLE_MB
+#include "beetle/beetle.hpp"
 #include "arch/i386/i386.hpp"
-
-#define DEBUG
-
-#define ASM(a) __asm__ volatile (a)
-
-#define NOP ASM("nop")
-#define HLT ASM("hlt")
+#include "vga_pc.hpp"
 
 void init_gdt  (ARCH::I386::GDT& gdt);
 void init_idt  (ARCH::I386::IDT& idt);
@@ -37,11 +34,22 @@ extern "C"
 	void interrupt_IRQ0	(void);
 }
 
-extern "C" void init(const unsigned int multibootInfoStructureAddr)
+/**
+ * //TODO: system call must be implemented somewheres
+ * Initialization sequence :
+ * 	Init CPU core features (GDT/LDT/IDT/paging)
+ * 	Init early memory management (malloc and other will be implemented in a process)
+ * 	Init process management
+ * 	Load a disk driver with the Module from GRUB
+ * 	Load an init stage 2 program
+ */
+//TODO: move the memory management thing in boot stage 2 ?
+extern "C" void init(const unsigned int multibootInfoDataStructPtr)
 {
 	ARCH::I386::GDT gdt (0x1000,512);
 	ARCH::I386::IDT idt (0x500, 256);
 	ARCH::I386::APIC apic;
+	VGA vga;
 
 	/* Initialize the new GDT */
 	init_gdt(gdt);
@@ -49,8 +57,26 @@ extern "C" void init(const unsigned int multibootInfoStructureAddr)
 	/* Initialize the new IDT */
 	init_idt(idt);
 
-	idt.makeCurrent();
-	apic.setTimerDivideValue(ARCH::I386::APIC::TIMER_DIVIDE_VALUE::D1);
+	BEETLE::MemoryManager mm;
+	vga.puts("BEETLE - Boot Stage 1\n");
+
+	BEETLE::MULTIBOOT::MultibootHelper mh (multibootInfoDataStructPtr);
+
+	if (mh.isFlagSet(BEETLE::MULTIBOOT::MultibootHelper::MODULE))
+	{
+		BEETLE::MULTIBOOT::ModuleInfo* moduleInfo = nullptr;
+		while ((moduleInfo = mh.getNextModuleInfoStruct()) != nullptr)
+		{
+			vga.putc(((uint8_t*)(moduleInfo->modStart))[0]);
+			vga.putc(((uint8_t*)(moduleInfo->modStart))[1]);
+			vga.putc(((uint8_t*)(moduleInfo->modStart))[2]);
+			vga.putc('\n');
+		}
+	}
+	else
+	{
+		//Error: we need multiboot module to continue the boot process
+	}
 }
 
 void init_gdt (ARCH::I386::GDT& gdt)
@@ -102,4 +128,6 @@ void init_idt (ARCH::I386::IDT& idt)
 
 	for (unsigned i = idt.getCount(); i < 32; ++i)
 		idt.addInterruptGateDescriptor(0,0x8,NOT_PRESENT);
+	
+	idt.makeCurrent();
 }

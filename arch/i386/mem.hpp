@@ -68,21 +68,21 @@ namespace ARCH {namespace I386 {
 	enum SYSTEM_SEGMENT_T
 	{
 		// 0 = reserved
-		TSS_A_16 = SYSTEM( 1), //16 bits TSS available
-		LDT	  = SYSTEM( 2), //LDT
-		TSS_B_16 = SYSTEM( 3), //16 bits TSS busy
-		CG_16	= SYSTEM( 4), //16 bits call gate
-		TG	   = SYSTEM( 5), //task gate
-		IG_16	= SYSTEM( 6), //16 bits interrupt gate
-		TG_16	= SYSTEM( 7), //16 bits trap gate
+		TSS_A_16	= SYSTEM( 1), //16 bits TSS available
+		LDT			= SYSTEM( 2), //LDT
+		TSS_B_16	= SYSTEM( 3), //16 bits TSS busy
+		CG_16		= SYSTEM( 4), //16 bits call gate
+		TG			= SYSTEM( 5), //task gate
+		IG_16		= SYSTEM( 6), //16 bits interrupt gate
+		TG_16		= SYSTEM( 7), //16 bits trap gate
 		// 8 = reserved
-		TSS_A_32 = SYSTEM( 9), //32 bits TSS available
+		TSS_A_32 	= SYSTEM( 9), //32 bits TSS available
 		// 10 = reserved
-		TSS_B_32 = SYSTEM(10), //32 bits TSS busy
-		CG_32	= SYSTEM(11), //32 bits call gate
+		TSS_B_32	= SYSTEM(10), //32 bits TSS busy
+		CG_32		= SYSTEM(11), //32 bits call gate
 		// 13 = reserved
-		IG_32	= SYSTEM(14), //32 bits interrupt gate
-		TG_32	= SYSTEM(15)  //32 bits trap gate
+		IG_32		= SYSTEM(14), //32 bits interrupt gate
+		TG_32		= SYSTEM(15)  //32 bits trap gate
 	};
 
 	enum class SEGMENT_NAMES
