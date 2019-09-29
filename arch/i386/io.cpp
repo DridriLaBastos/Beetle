@@ -15,6 +15,6 @@ void ARCH::I386::IO::outB(const unsigned int data, const unsigned int portNumber
 void ARCH::I386::IO::outW(const unsigned int data, const unsigned int portNumber) { outw(data,portNumber); }
 void ARCH::I386::IO::outD(const unsigned int data, const unsigned int portNumber) { outd(data,portNumber); }
 
-unsigned int ARCH::I386::IO::inB(const unsigned int portNumber) { inb(portNumber); }
-unsigned int ARCH::I386::IO::inW(const unsigned int portNumber) { inw(portNumber); }
-unsigned int ARCH::I386::IO::inD(const unsigned int portNumber) { ind(portNumber); }
+unsigned int ARCH::I386::IO::inB(const unsigned int portNumber) { return inb(portNumber); }
+unsigned int ARCH::I386::IO::inW(const unsigned int portNumber) { return inw(portNumber); }
+unsigned int ARCH::I386::IO::inD(const unsigned int portNumber) { return ind(portNumber); }

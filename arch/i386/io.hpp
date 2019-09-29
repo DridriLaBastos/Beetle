@@ -6,9 +6,9 @@
 namespace ARCH {namespace I386 {namespace IO
 {
 	//I just like using unsigned int for data, I have no reasons why
-	void outB (const unsigned int data, const unsigned int const portNumber);
-	void outW (const unsigned int data, const unsigned int const portNumber);
-	void outD (const unsigned int data, const unsigned int const portNumber);
+	void outB (const unsigned int data, const unsigned int portNumber);
+	void outW (const unsigned int data, const unsigned int portNumber);
+	void outD (const unsigned int data, const unsigned int portNumber);
 
 	unsigned int inB (const unsigned int portNumber);
 	unsigned int inW (const unsigned int portNumber);

@@ -22,7 +22,7 @@ export MAJOR_VERSION	= 0
 export MINOR_VERSION	= 1
 export FIX_VERSION		= 2 #2 implementing the apics functionnality of the 0.1* version
 
-DIR = arch beetle boot
+DIR = arch beetle boot drivers
 DEBUG = 
 BOCHS_PREFIX = 
 
@@ -41,6 +41,7 @@ $(DIR):
 
 boot: beetle
 beetle: arch
+drivers: beetle
 
 iso: beetle.iso
 beetle.iso: boot/boot-stage-1/boot-stage-1
@@ -55,15 +56,12 @@ run:
 drun:
 	@$(MAKE) run DEBUG=1
 
-clean:
-	@for i in $(DIR); do $(MAKE) -C $$i clean; done
+clean mrproper:
+	@for dir in $(DIR); do $(MAKE) -C $$dir $@; done
 
 iclean:
 	rm -Rfd iso
 	rm beetle.iso
-
-mrproper:
-	@for i in $(DIR); do $(MAKE) -C $$i mrproper; done
 
 distclean: clean iclean mrproper
 rebuild: distclean all iso

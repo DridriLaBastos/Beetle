@@ -80,13 +80,13 @@ FUNCTION inb
 	and eax, 0xFF
 	ret
 
-FUNCTNION inw
+FUNCTION inw
 	mov edx, ecx
 	in ax, dx
 	and eax, 0xFFFF
 	ret
 
-FUNCTNION ind
+FUNCTION ind
 	mov edx, ecx
 	in eax, dx
 	ret
