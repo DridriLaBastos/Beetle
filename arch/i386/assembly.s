@@ -54,21 +54,41 @@ FUNCTION getCurrentSSDescriptorHigh
 	ret
 
 ;bunch of functions to write value to an I/O port. Those functions use the fastcall ABI:
-;	ecx --> adress of the data to write
+;	ecx --> data to write
 ;	edx --> port number
 FUNCTION outb
-	mov esi, ecx
-	outsb
+	mov eax, ecx
+	out dx, al
 	ret
 
 FUNCTION outw
-	mov esi, ecx
-	outsw
+	mov eax, ecx
+	out dx, ax
 	ret
 
 FUNCTION outd
-	mov esi, ecx
-	outsd
+	mov eax, ecx
+	out dx, eax
+	ret
+
+;TODO: find if there is an ABI that permit with gcc to directly pass the first parameter into edx
+;bunch of functions to read data to an I/O port. Those functions uses the thiscall ABI:
+;	ecx --> port number to read
+FUNCTION inb
+	mov edx, ecx
+	in al, dx
+	and eax, 0xFF
+	ret
+
+FUNCTNION inw
+	mov edx, ecx
+	in ax, dx
+	and eax, 0xFFFF
+	ret
+
+FUNCTNION ind
+	mov edx, ecx
+	in eax, dx
 	ret
 
 section .data
