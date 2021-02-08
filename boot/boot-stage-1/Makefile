@@ -8,7 +8,7 @@ LDFLAGS += -L$(SRC_DIR)/arch/$(TARGET) -L$(SRC_DIR)/beetle
 
 OBJ		= $(ASOBJ) $(CXXOBJ)
 
-EXEC	= boot-stage-1
+EXEC	= boot-stage-1.out
 
 $(EXEC): $(OBJ) $(TARGET_LIB)
 	$(LD) $(LDFLAGS) --script=linker.ld $(OBJ) -l$(TARGET) -lbeetle -o $@

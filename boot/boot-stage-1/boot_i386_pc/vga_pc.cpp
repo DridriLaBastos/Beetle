@@ -1,7 +1,7 @@
 #include "vga_pc.hpp"
 
-constexpr unsigned int VGA_SCREEN_SIZE_X = 80;
-constexpr unsigned int VGA_SCREEN_SIZE_Y = 25;
+static constexpr unsigned int VGA_SCREEN_SIZE_X = 80;
+static constexpr unsigned int VGA_SCREEN_SIZE_Y = 25;
 
 VGA::VGA(): m_vgaRam((uint16_t*)0xB8000), m_vgaBufferPosX(0), m_vgaBufferPosY(0)
 {

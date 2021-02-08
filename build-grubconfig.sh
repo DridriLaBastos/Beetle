@@ -6,6 +6,6 @@
 #and I can change the order of them, or ask GRUB for other modules without woring to much in the kernel code
 #TODO: Is really usefull to pass the name of the module ?
 echo menuentry \"Beetle$MAJOR_VERSION.$MINOR_VERSION.$FIX_VERSION\" { > iso/boot/grub/grub.cfg
-echo "		multiboot /boot/boot-stage-1" >> iso/boot/grub/grub.cfg
-echo "		module /drivers/test" >> iso/boot/grub/grub.cfg
+echo "		multiboot /boot/boot-stage-1.out" >> iso/boot/grub/grub.cfg
+#echo "		module /drivers/test" >> iso/boot/grub/grub.cfg
 echo } >> iso/boot/grub/grub.cfg

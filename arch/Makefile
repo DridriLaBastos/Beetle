@@ -1,4 +1,7 @@
 all:
+	@echo
+	@echo --- COMPILING TARGET $$TARGET ---
+	@echo
 	$(MAKE) -C $(TARGET)
 
 .PHONY: clean mrproper

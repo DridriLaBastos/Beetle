@@ -1,8 +1,6 @@
-#define BEETLE_MM
-#define BEETLE_MB
+#include "vga_pc.hpp"
 #include "beetle/beetle.hpp"
 #include "arch/i386/i386.hpp"
-#include "vga_pc.hpp"
 
 void init_gdt  (ARCH::I386::GDT& gdt);
 void init_idt  (ARCH::I386::IDT& idt);
@@ -75,6 +73,7 @@ extern "C" void init(const unsigned int multibootInfoDataStructPtr)
 	}
 	else
 	{
+		vga.puts("ERROR\n");
 		//Error: we need multiboot module to continue the boot process
 	}
 }
@@ -98,10 +97,8 @@ void init_gdt (ARCH::I386::GDT& gdt)
 void init_idt (ARCH::I386::IDT& idt)
 {
 	//Shuting down the pic
-	__asm__ (
-	"movb $0xFF, %al\n"
-	"outb %al, $0xA1\n"
-	"outb %al, $0x21\n");
+	outb(0xFF,0xA1);
+	outb(0xFF,0x21);
 
 	//Initializing IDT descriptors
 	idt.addInterruptGateDescriptor((unsigned)interrupt_DE,  0x8, PRESENT | PRIVILEGE0);

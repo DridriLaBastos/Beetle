@@ -43,7 +43,7 @@ boot: beetle
 beetle: arch
 
 iso: beetle.iso
-beetle.iso: boot/boot-stage-1/boot-stage-1
+beetle.iso: boot/boot-stage-1/boot-stage-1.out
 	@mkdir -p iso/boot/grub
 	@sh build-grubconfig.sh
 	@cp -f $^ iso/boot/

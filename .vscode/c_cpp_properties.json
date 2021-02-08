@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "BeetleDev",
+            "includePath": [
+                "${workspaceFolder}"
+            ],
+            "defines": [],
+            "macFrameworkPath": [],
+            "compilerPath": "${env:DEV}/bin/i686-elf-gcc",
+            "intelliSenseMode": "gcc-x86",
+            "compilerArgs": [
+                "-ffreestanding"
+            ],
+            "cppStandard": "c++11",
+            "cStandard": "c11"
+        }
+    ],
+    "version": 4
+}

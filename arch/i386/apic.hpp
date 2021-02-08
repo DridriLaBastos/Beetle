@@ -1,7 +1,7 @@
 #ifndef APIC_HPP
 #define APIC_HPP
 
-#include "stdint.h"
+#include <stdint.h>
 
 namespace ARCH {namespace I386
 {

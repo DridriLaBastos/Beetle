@@ -34,9 +34,6 @@
 # Apple plateform
 *.DS_Store
 
-# Visual Stusio Code Intellisense
-*.vscode
-
 # Generation of the ISO File by Grub
 *.iso
 iso
