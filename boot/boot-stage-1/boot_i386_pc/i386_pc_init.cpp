@@ -42,7 +42,7 @@ extern "C"
  * 	Load an init stage 2 program
  */
 //TODO: move the memory management thing in boot stage 2 ?
-extern "C" void init(const unsigned int multibootInfoDataStructPtr)
+extern "C" void init(const uint32_t* multibootInfoPtr)
 {
 	ARCH::I386::GDT gdt (0x1000,512);
 	ARCH::I386::IDT idt (0x500, 256);
@@ -58,22 +58,23 @@ extern "C" void init(const unsigned int multibootInfoDataStructPtr)
 	BEETLE::MemoryManager mm;
 	vga.puts("BEETLE - Boot Stage 1\n");
 
-	BEETLE::MULTIBOOT::MultibootHelper mh (multibootInfoDataStructPtr);
+	BEETLE::MULTIBOOT::MultibootHelper mh (multibootInfoPtr);
 
 	if (mh.isFlagSet(BEETLE::MULTIBOOT::MultibootHelper::MODULE))
 	{
-		BEETLE::MULTIBOOT::ModuleInfo* moduleInfo = nullptr;
-		while ((moduleInfo = mh.getNextModuleInfoStruct()) != nullptr)
+		vga.putc(mh.getBootmoduleCount() + '0');
+		vga.puts(" submodules loaded\n");
+		for (unsigned int i = 0; i < mh.getBootmoduleCount(); ++i)
 		{
-			vga.putc(((uint8_t*)(moduleInfo->modStart))[0]);
-			vga.putc(((uint8_t*)(moduleInfo->modStart))[1]);
-			vga.putc(((uint8_t*)(moduleInfo->modStart))[2]);
+			BEETLE::MULTIBOOT::ModuleInfo* moduleInfo = mh.getBootModuleInfo(i);
+			vga.puts(moduleInfo->modString);
 			vga.putc('\n');
 		}
 	}
 	else
 	{
-		vga.puts("ERROR\n");
+		vga.puts(mh.getBootmoduleCount() == 0 ? "No bootmodule loaded" : "ERROR");
+		vga.putc('\n');
 		//Error: we need multiboot module to continue the boot process
 	}
 }
@@ -96,10 +97,6 @@ void init_gdt (ARCH::I386::GDT& gdt)
 
 void init_idt (ARCH::I386::IDT& idt)
 {
-	//Shuting down the pic
-	outb(0xFF,0xA1);
-	outb(0xFF,0x21);
-
 	//Initializing IDT descriptors
 	idt.addInterruptGateDescriptor((unsigned)interrupt_DE,  0x8, PRESENT | PRIVILEGE0);
 	idt.addInterruptGateDescriptor((unsigned)interrupt_DB,  0x8, PRESENT | PRIVILEGE0);
@@ -128,3 +125,5 @@ void init_idt (ARCH::I386::IDT& idt)
 	
 	idt.makeCurrent();
 }
+
+#include "beetle/beetle.cpp"

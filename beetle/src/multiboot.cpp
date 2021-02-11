@@ -1,30 +1,27 @@
 #include "../multiboot.hpp"
 
-BEETLE::MULTIBOOT::MultibootHelper::MultibootHelper(const unsigned int multibootInfoStructPtr): m_multibootInfoStructPtr((uint32_t*)multibootInfoStructPtr), m_flags(m_multibootInfoStructPtr[0]), m_currentModuleInfoStruct(0)
+BEETLE::MULTIBOOT::MultibootHelper::MultibootHelper(const uint32_t* const multibootInfoPtr): m_multibootInfoPtr(multibootInfoPtr)
 {}
 
-BEETLE::MULTIBOOT::ModuleInfo* BEETLE::MULTIBOOT::MultibootHelper::getNextModuleInfoStruct()
+bool BEETLE::MULTIBOOT::MultibootHelper::isFlagSet(const FLAGS flag) const
 {
-	const uint32_t totalModuleLoadedCount = getBootmoduleCount();
-
-	if (totalModuleLoadedCount == 0)
-		return nullptr;
-	
-	if (m_currentModuleInfoStruct == totalModuleLoadedCount)
-		return nullptr;
-	
-	ModuleInfo* ret = (ModuleInfo*)(m_multibootInfoStructPtr[6]);
-	return &(ret[m_currentModuleInfoStruct++]);
+	const uint32_t flags = m_multibootInfoPtr[0];
+	return flags & flag;
 }
 
-BEETLE::MULTIBOOT::ModuleInfo* BEETLE::MULTIBOOT::MultibootHelper::getModuleInfoStructForModuleNumber(const unsigned int moduleNumber) const
+unsigned int BEETLE::MULTIBOOT::MultibootHelper::getBootmoduleCount() const
+{ return m_multibootInfoPtr[5]; }
+
+BEETLE::MULTIBOOT::ModuleInfo* BEETLE::MULTIBOOT::MultibootHelper::getBootModuleInfo(const unsigned int n) const
 {
-	const uint32_t totalModuleLoadedCount = getBootmoduleCount();
+	const uint32_t bootmoduleCount = getBootmoduleCount();
 
-	if (totalModuleLoadedCount == 0)
+	if (bootmoduleCount == 0)
 		return nullptr;
-
-	const unsigned int safeModuleNumber = moduleNumber % totalModuleLoadedCount;
-	ModuleInfo* ret = (ModuleInfo*)(m_multibootInfoStructPtr[6]);
-	return &(ret[safeModuleNumber]);
+	
+	if (n >= bootmoduleCount)
+		return nullptr;
+	
+	ModuleInfo* moduleInfos = (ModuleInfo*)(m_multibootInfoPtr[6]);
+	return &moduleInfos[n];
 }

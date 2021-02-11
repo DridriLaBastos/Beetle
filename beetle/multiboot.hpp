@@ -24,17 +24,14 @@ namespace BEETLE {namespace MULTIBOOT {
 			};
 
 		public:
-			MultibootHelper (const unsigned int multibootInfoDataStructPtr);
+			MultibootHelper (const uint32_t* const multibootInfoPtr);
 
-			bool isFlagSet (const unsigned int flag) const { return (m_flags & flag) == flag;}
-			unsigned int getBootmoduleCount(void) const { return m_multibootInfoStructPtr[5]; }
-			ModuleInfo* getNextModuleInfoStruct (void);
-			ModuleInfo* getModuleInfoStructForModuleNumber (const unsigned int moduleNumber) const;
+			bool isFlagSet (const FLAGS flag) const;
+			unsigned int getBootmoduleCount(void) const;
+			ModuleInfo* getBootModuleInfo (const unsigned int n) const;
 
 		private:
-			const uint32_t* m_multibootInfoStructPtr;
-			const uint32_t m_flags;
-			unsigned int m_currentModuleInfoStruct;
+			const uint32_t* m_multibootInfoPtr;
 	};
 }}
 
