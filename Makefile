@@ -22,7 +22,7 @@ export MAJOR_VERSION	= 0
 export MINOR_VERSION	= 1
 export FIX_VERSION		= 2 #2 implementing the apics functionnality of the 0.1* version
 
-DIR = arch beetle boot
+DIR = arch boot
 DEBUG = 
 BOCHS_PREFIX = 
 
@@ -43,7 +43,7 @@ boot: beetle
 beetle: arch
 
 iso: beetle.iso
-beetle.iso: boot/boot-stage-1/boot-stage-1.out
+beetle.iso: boot/boot-stage-1/boot-stage-1.out build-grubconfig.sh
 	@mkdir -p iso/boot/grub
 	@sh build-grubconfig.sh
 	@cp -f $^ iso/boot/
