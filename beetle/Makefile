@@ -1,33 +1,28 @@
-CXXSRC = $(wildcard src/*.cpp)
+CXXSRC = $(wildcard *.cpp)
+CXXARCHSRC = $(wildcard arch/$(TARGET)/*.cpp)
+
 CXXOBJ = $(CXXSRC:.cpp=.o)
+CXXARCHOBJ = $(CXXARCHSRC:.cpp=.o)
 
-DEPFLAGS	= -MM -MF
-DEPOBJ	= $(CXXSRC:.cpp=.d)
-OBJ		= $(CXXOBJ) $(ASOBJ)
+ASSRC = $(wildcard *.s) arch/i386/preinit.s
+ASOBJ = $(ASSRC:.s=.o)
 
-PRODUCT = libbeetle.a
+OBJ = $(CXXOBJ) $(CXXARCHOBJ) $(ASOBJ)
 
-.PHONY: clean mrproper all
+PRODUCT = beetle.elf
 
-all:
-	@echo
-	@echo --- COMPILING BEETLE ARCHITECTURE INDEPENDANNT CODE ---
-	@echo
-	@make $(PRODUCT)
+.PHONY: clean mrproper all arch
 
-$(PRODUCT): $(DEPOBJ) $(CXXOBJ)
-	@echo
-	@echo --- CREATING LIBBEETLE.A ---
-	@echo
-	$(AR) -vrus $@ $(CXXOBJ)
+$(PRODUCT): $(OBJ)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -Wl,--script=linker.ld -o $@ $^
 
-%.d: %.cpp
-	$(CXX) $(DEPFLAGS) $@ $^
+$(CXXARCHOBJ): $(CXXARCHSRC)
+	$(MAKE) -C arch/$(TARGET)
+
+#kmain.o: $(CXXSRC) arch/i386/i386.cpp
 
 clean:
-	rm $(CXXOBJ)
+	rm $(OBJ)
 
 mrproper:
 	rm $(PRODUCT)
-
-include $(wildcard $(DEPOBJ))
