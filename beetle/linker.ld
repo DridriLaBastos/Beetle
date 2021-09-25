@@ -25,6 +25,10 @@ SECTIONS
 		*(COMMON)
 	}
 
+	.idt ALIGN(8) : {
+		*(idt)
+	}
+
 	.gdt ALIGN(8) : {
 		*(gdt)
 	}

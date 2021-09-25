@@ -3,8 +3,8 @@ Hobby OS for x86 plateform in c++ (and a little bit of nasm)
 
 # Build
 
-To build it you have to have on your path a version of g++, ld, ar and nasm
-that can creat i686-elf executables.
+To build it you have to have on your path a gcc version 7+ (currently developed on gcc 7.5.0), ld, ar and nasm
+that can create i686-elf executables.
 When you have everything, go to the top directory, and run make, everything should 
 compile
 

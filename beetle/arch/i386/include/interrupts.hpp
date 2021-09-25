@@ -23,6 +23,24 @@ namespace ARCH::I386
 	__attribute__((interrupt)) void interruptMC (const void* ptr);
 	__attribute__((interrupt)) void interruptXM (const void* ptr);
 	__attribute__((interrupt)) void interruptVE (const void* ptr);
+	
+	__attribute__((interrupt)) void irq0 (const void* ptr);
+	__attribute__((interrupt)) void irq1 (const void* ptr);
+	__attribute__((interrupt)) void irq2 (const void* ptr);
+	__attribute__((interrupt)) void irq3 (const void* ptr);
+	__attribute__((interrupt)) void irq4 (const void* ptr);
+	__attribute__((interrupt)) void irq5 (const void* ptr);
+	__attribute__((interrupt)) void irq6 (const void* ptr);
+	__attribute__((interrupt)) void irq7 (const void* ptr);
+
+	__attribute__((interrupt)) void irq8 (const void* ptr);
+	__attribute__((interrupt)) void irq9 (const void* ptr);
+	//__attribute__((interrupt)) void irq10 (const void* ptr); reserved
+	//__attribute__((interrupt)) void irq11 (const void* ptr); reserved
+	//__attribute__((interrupt)) void irq12 (const void* ptr); reserved
+	__attribute__((interrupt)) void irq13 (const void* ptr);
+	__attribute__((interrupt)) void irq14 (const void* ptr);
+	//__attribute__((interrupt)) void irq15 (const void* ptr); reserved
 }
 
 #endif

@@ -20,3 +20,17 @@ void ARCH::I386::interruptAC  (const void* ptr) { asm("xchg %bx, %bx"); }
 void ARCH::I386::interruptMC  (const void* ptr) { asm("xchg %bx, %bx"); }
 void ARCH::I386::interruptXM  (const void* ptr) { asm("xchg %bx, %bx"); }
 void ARCH::I386::interruptVE  (const void* ptr) { asm("xchg %bx, %bx"); }
+
+void ARCH::I386::irq0 (const void* ptr) {}
+void ARCH::I386::irq1 (const void* ptr) {}
+void ARCH::I386::irq2 (const void* ptr) {}
+void ARCH::I386::irq3 (const void* ptr) {}
+void ARCH::I386::irq4 (const void* ptr) {}
+void ARCH::I386::irq5 (const void* ptr) {}
+void ARCH::I386::irq6 (const void* ptr) {}
+void ARCH::I386::irq7 (const void* ptr) {}
+
+void ARCH::I386::irq8 (const void* ptr) {}
+void ARCH::I386::irq9 (const void* ptr) {}
+void ARCH::I386::irq13 (const void* ptr) {}
+void ARCH::I386::irq14 (const void* ptr) {}

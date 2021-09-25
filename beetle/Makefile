@@ -1,13 +1,21 @@
 CXXSRC = $(wildcard *.cpp)
 CXXARCHSRC = $(wildcard arch/$(TARGET)/*.cpp)
 
+ASSRC = $(wildcard *.s)
+ASARCHSRC  = $(wildcard arch/$(TARGET)/*.s)
+
 CXXOBJ = $(CXXSRC:.cpp=.o)
+ASOBJ  = $(ASSRC:.s=.o)
+
 CXXARCHOBJ = $(CXXARCHSRC:.cpp=.o)
+ASARCHOBJ  = $(ASARCHSRC:.s=.o)
 
-ASSRC = $(wildcard *.s) arch/i386/preinit.s
-ASOBJ = $(ASSRC:.s=.o)
+BEETLEOBJ = $(CXXOBJ) $(ASOBJ)
 
-OBJ = $(CXXOBJ) $(CXXARCHOBJ) $(ASOBJ)
+ARCHSRC = $(CXXARCHSRC) $(ASARCHSRC)
+ARCHOBJ = $(CXXARCHOBJ) $(ASARCHOBJ)
+
+OBJ = $(BEETLEOBJ) $(ARCHOBJ)
 
 PRODUCT = beetle.elf
 
@@ -15,8 +23,10 @@ PRODUCT = beetle.elf
 
 $(PRODUCT): $(OBJ)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -Wl,--script=linker.ld -o $@ $^
+	$(PREFIX)nm --demangle --numeric-sort $@ > ../tmps
+	$(PREFIX)objdump -d -M intel $@ > ../tmpd
 
-$(CXXARCHOBJ): $(CXXARCHSRC)
+$(ARCHOBJ): $(ARCHSRC)
 	$(MAKE) -C arch/$(TARGET)
 
 #kmain.o: $(CXXSRC) arch/i386/i386.cpp

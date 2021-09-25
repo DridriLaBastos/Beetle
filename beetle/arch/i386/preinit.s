@@ -5,7 +5,10 @@
 %include "include/descriptor.s"
 
 %define GDT_SIZE_IN_SEGMENTS 256
+%define IDT_SIZE_IN_ENTRIES  256
+
 %define GDT_SIZE_IN_BYTES GDT_SIZE_IN_SEGMENTS * 8 - 1
+%define IDT_SIZE_IN_BYTES IDT_SIZE_IN_ENTRIES * 8 - 1
 
 extern kmain
 
@@ -36,34 +39,36 @@ preinit:
 	mov esp, 0x7FB00
 
 	call kmain
+	cli ;If ever we returns from kmain it means that something bad happened
 
 	.loop:
-		cli
 		hlt
 		jmp .loop
 
 section .data
+global gdt_current, idt_current, gdtr, idtr, gdt, idt
+
+gdt_current: dd 4
+idt_current: dd 0
+gdt: dd gdt_start
+idt: dd idt_start
+
 gdtr:
 	.limit: dw GDT_SIZE_IN_BYTES
 	.base: dd gdt_start
 
-;Interrupt vectors from the old vectors
-;TODO: Maybe I don't want to overright the old vector in case I want to virtual 8086 mode
-global idtr, idtSize, idtBase
-idtSize: dw 0x499
-idtBase: dd 0
-
 idtr:
-	.limit: dw 0x499
-	.base: dd 0
+	.limit: dw IDT_SIZE_IN_BYTES
+	.base: dd idt_start
 
-
-section gdt
-gdt_start: ;Will be aligned on 8bytes boundaries by the linker script
+section gdt write qword
+gdt_start:
 	dq 0;First entry in the GDT must be null
 	DESCRIPTOR(0,0xFFFFF,CODE_EXECUTE_READ,PRESENT | PRIVILEDGE0,GRANNULARITY_4K | SIZE32)
 	DESCRIPTOR(0,0xFFFFF,DATA_READ_WRITE   ,PRESENT | PRIVILEDGE0,GRANNULARITY_4K | SIZE32)
-	DESCRIPTOR(0x600,0x7FAFF,DATA_READ_WRITE,PRESENT | PRIVILEDGE0,GRANULARITY_BYTE | SIZE32);stack from the low memory region on the available space : 0x500 to 0x7FFFF
+	DESCRIPTOR(0x600,0x7FAFF,DATA_READ_WRITE,PRESENT | PRIVILEDGE0,GRANULARITY_BYTE | SIZE32);stack from the low memory region on the available space : 0x500 to 0x7FFFF (avoiding the old interrupt vectors from the BIOS)
+	resq GDT_SIZE_IN_SEGMENTS - 4
 
-	DESCRIPTOR(0,0xFFFFF,CODE_EXECUTE_READ,PRESENT | PRIVILEDGE3,GRANNULARITY_4K | SIZE32)
-	DESCRIPTOR(0,0xFFFFF,DATA_READ_WRITE   ,PRESENT | PRIVILEDGE3,GRANNULARITY_4K | SIZE32)
+section idt write qword
+idt_start:
+	resq IDT_SIZE_IN_ENTRIES
