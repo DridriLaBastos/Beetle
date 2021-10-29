@@ -9,6 +9,8 @@ export AS		= nasm
 export AR		= $(PREFIX)ar
 export LD		= $(PREFIX)ld
 export CXX		= $(PREFIX)gcc -march=i386
+export NM		= $(PREFIX)nm
+export OBJDUMP	= $(PREFIX)objdump
 #export CC		= $(PREFIX)gcc -m32 -std=c11
 #export LDFLAGS	= -nostdlib --strip-all -melf_i386
 export CPPFLAGS	= -I$(BEETLE)/include -I$(PROJECT_DIR)
@@ -32,7 +34,7 @@ endif
 
 BOCHS = $(BOCHS_PREFIX)bochs
 
-.PHONY: all $(DIR) clean mrproper distclean rebuild iso
+.PHONY: all $(DIR) clean mrproper distclean rebuild
 
 all: $(DIR)
 
