@@ -2,7 +2,7 @@
 [CPU 386]
 ;The kernel will be loaded by GRUB.
 
-%include "include/descriptor.s"
+%include "descriptor.s"
 
 %define GDT_SIZE_IN_SEGMENTS 256
 %define IDT_SIZE_IN_ENTRIES  256
