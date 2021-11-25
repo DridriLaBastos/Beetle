@@ -12,11 +12,12 @@
             "intelliSenseMode": "macos-gcc-x86",
             "compilerArgs": [
                 "-ffreestanding",
-                "-march=i386"
+                "-march=i386",
+				"-nostdlib",
+				"-nostdinc++"
             ],
-            "cStandard": "c17",
-            "cppStandard": "c++20",
-            "configurationProvider": "ms-vscode.cmake-tools"
+            "cStandard": "c11",
+            "cppStandard": "c++17"
         }
     ],
     "version": 4

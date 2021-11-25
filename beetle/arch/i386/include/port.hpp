@@ -3,17 +3,38 @@
 
 #include <stdint.h>
 
-extern "C"
+namespace ARCH::I386
 {
-	//The attibute regparm(2) causes gcc to pass the first parameter of the function in eax and the second in edx. Tis is what we want for out function because the instructions have the form 'out accumulator, dx', so we want to have the value to out in ax and the addres in dx
-	__attribute__ ((regparm(2))) void outb (const uint8_t value, const unsigned int addr);
-	__attribute__ ((regparm(2))) void outw (const uint16_t value, const unsigned int addr);
-	__attribute__ ((regparm(2))) void outd (const uint32_t value, const unsigned int addr);
+	static inline void outb (const uint8_t value, const uint16_t addr)
+	{ asm ("outb %%al, %1":: "a" (value), "dx" (addr)); }
+	static inline void outw (const uint16_t value, const uint16_t addr)
+	{ asm ("outw %%ax, %1":: "a" (value), "dx" (addr)); }
+	static inline void outd (const uint32_t value, const uint16_t addr)
+	{ asm ("outd %%eax, %1":: "a" (value), "dx" (addr)); }
 
-	//The atribute fastcall causes gcc to pass the first parameter of the funtion in edx. This makes sense because the in instruction have the form 'in accumulator, dx' so we want to have the addr in dx
-	__attribute__((fastcall)) uint8_t inb (const unsigned int addr);
-	__attribute__((fastcall)) uint16_t inw (const unsigned int addr);
-	__attribute__((fastcall)) uint32_t ind (const unsigned int addr);
+	static inline uint8_t inb (const uint16_t addr)
+	{
+		uint8_t result = 0;
+		asm ("xor %eax, %eax");
+		asm ("inb %1, %%al" : "=a" (result) : "dx" (addr));
+		return result;
+	}
+
+	static inline uint16_t inw (const uint16_t addr)
+	{
+		uint16_t result = 0;
+		asm("xor %eax, %eax");
+		asm ("inw %1, %%ax" : "=a" (result) : "dx" (addr));
+		return result;
+	}
+
+	static inline uint32_t ind (const uint16_t addr)
+	{
+		uint32_t result = 0;
+		asm("xor %eax, %eax");
+		asm ("ind %1, %%eax" : "=a" (result) : "dx" (addr));
+		return result;
+	}
 }
 
 #endif

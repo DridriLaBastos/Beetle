@@ -158,7 +158,7 @@ void __attribute__((noreturn)) ARCH::endlessLoop()
 {
 	while (true)
 	{
-		asm ("xchg %bx, %bx");
+		//asm ("xchg %bx, %bx");
 		asm ("hlt");
 	}
 }
