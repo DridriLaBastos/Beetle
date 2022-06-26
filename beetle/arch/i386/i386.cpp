@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <beetle/arch.hpp>
+#include "beetle/arch.hpp"
 
 #include "include/port.hpp"
 #include "include/protected.hpp"

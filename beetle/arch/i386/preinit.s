@@ -47,6 +47,7 @@ preinit:
 	; second rgs = savec value of ebx
 	push esi
 	push edi
+	xchg bx, bx
 	call kmain
 	cli ;If ever we returns from kmain it means that something bad happened
 

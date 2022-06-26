@@ -29,4 +29,5 @@ void VGA::puts(const char* const str)
 	const char* tmp = str;
 	while (*tmp != '\0')
 		putc(*tmp++);
+	putc('\n');
 }

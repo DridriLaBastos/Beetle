@@ -17,4 +17,5 @@ set(CMAKE_CXX_FLAGS_RELEASE" ${CMAKE_CXX_FLAGS_RELEASE} -flto")
 add_subdirectory(beetle)
 
 add_custom_target(run COMMAND bochs -q
-					WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} )
+					WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+					DEPENDS beetle.elf)

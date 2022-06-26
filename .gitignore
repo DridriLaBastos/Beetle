@@ -45,5 +45,7 @@ iso
 # info file of several commands
 help
 
-# cmake
+# cmake artifacts
 build
+tmpd.txt
+tmps.txt
