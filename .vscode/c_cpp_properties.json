@@ -5,16 +5,20 @@
             "includePath": [
                 "${env:DEV}/include",
                 "${workspaceFolder}",
-                "${workspaceFolder}/beetle/include"
+                "${workspaceFolder}/beetle/include",
+                "${workspaceFolder}/libc/include"
             ],
-            "defines": [],
+            "defines": [
+				"BEETLE_PMN_NAME=\"pmn.elf\""
+			],
             "compilerPath": "/Users/adrien/dev/bin/i686-elf-gcc",
             "intelliSenseMode": "macos-gcc-x86",
             "compilerArgs": [
                 "-ffreestanding",
                 "-march=i386",
 				"-nostdlib",
-				"-nostdinc++"
+				"-nostdinc++",
+				"-fno-permissive"
             ],
             "cStandard": "c11",
             "cppStandard": "c++17"

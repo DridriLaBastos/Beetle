@@ -8,10 +8,12 @@ include_directories(include)
 add_subdirectory(arch/${TARGET})
 add_subdirectory(services)
 
+set(BEETLE_PMN_NAME "pmn.elf")
+
 file(WRITE ${PROJECT_BINARY_DIR}/iso/boot/grub/grub.cfg
 "menuentry \"Beetle ${BEETLE_KERNEL_VERSION}\" {
 	multiboot /boot/beetle.elf
-	module /bin/pmn.elf
+	module /bin/pmn.elf \"${BEETLE_PMN_NAME}\"
 }"
 )
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/iso/bin)
@@ -24,6 +26,8 @@ foreach(asm_file ${ASM_NASM_SOURCES})
 endforeach(asm_file ${ASM_NASM_SOURCES})
 
 add_executable(beetle.elf ${CXX_SOURCES} ${ASM_NASM_SOURCES})
+
+target_link_libraries(beetle.elf libc)
 add_dependencies(beetle.elf pmn.elf)
 
 target_link_options(beetle.elf
@@ -31,7 +35,7 @@ target_link_options(beetle.elf
 					)
 target_link_libraries(beetle.elf ${TARGET})
 
-target_compile_definitions(beetle.elf PUBLIC BEETLE_PMN_NAME="pmn.elf")
+target_compile_definitions(beetle.elf PUBLIC BEETLE_PMN_NAME="${BEETLE_PMN_NAME}")
 
 add_custom_command(TARGET beetle.elf POST_BUILD
 					COMMAND ${CMAKE_COMMAND} -E copy beetle.elf iso/boot/beetle.elf

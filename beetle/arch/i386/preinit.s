@@ -14,7 +14,6 @@ extern kmain
 
 global preinit
 preinit:
-	xchg bx, bx
 	mov edi, eax ;Saving the value of eax it will be passed to stack for kmain to verify that the bootloard is multiboot compliant
 	mov esi, ebx ;Saving the value of ebx : it will contain the address of the multiboot info datastructur
 
@@ -47,7 +46,6 @@ preinit:
 	; second rgs = savec value of ebx
 	push esi
 	push edi
-	xchg bx, bx
 	call kmain
 	cli ;If ever we returns from kmain it means that something bad happened
 
