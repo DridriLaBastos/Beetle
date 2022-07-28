@@ -1,3 +1,3 @@
 project("Beetle libC" C)
 
-add_library(libc string.c)
+add_library(c string.c)
