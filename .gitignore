@@ -46,6 +46,9 @@ iso
 help
 
 # cmake artifacts
-build
+*build*
 tmpd.txt
 tmps.txt
+
+# CLion
+.idea
