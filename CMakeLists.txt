@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR) #3.12 needed to use file GLOB CONFIGURE_DEPENDS option
+
 project(BeetleOS
 		VERSION 0.0.2
 		DESCRIPTION "Microkernel operating system"
