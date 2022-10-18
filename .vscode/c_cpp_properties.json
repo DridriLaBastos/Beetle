@@ -5,6 +5,7 @@
             "includePath": [
                 "${env:DEV}/include",
                 "${workspaceFolder}",
+                "${workspaceFolder}/beetle/arch/i386",
                 "${workspaceFolder}/beetle/include",
                 "${workspaceFolder}/libc/include"
             ],
@@ -21,7 +22,7 @@
 				"-fno-permissive"
             ],
             "cStandard": "c11",
-            "cppStandard": "c++17",
+            "cppStandard": "c++11",
 			"configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
