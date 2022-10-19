@@ -1,4 +1,4 @@
-#include "string.h"
+#include "../string.h"
 
 #define CHAR_COMP(chptr1,chptr2) *(chptr1++) - *(chptr2++)
 

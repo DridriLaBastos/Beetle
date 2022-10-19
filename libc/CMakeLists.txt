@@ -1,5 +1,5 @@
 project("Beetle libC" C)
 
-file(GLOB LIBC_C_SRC CONFIGURE_DEPENDS *.c)
+file(GLOB LIBC_C_SRC CONFIGURE_DEPENDS src/*.c)
 
-add_library(c ${LIBC_C_SRC} include/stdint.h)
+add_library(c ${LIBC_C_SRC} stdint.h)
