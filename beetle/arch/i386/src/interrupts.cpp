@@ -1,5 +1,4 @@
-#include "include/port.hpp"
-#include "include/interrupts.hpp"
+#include "i386.hpp"
 
 #define PIC_EOI 0x20
 #define MASTER_PIC_PORT 0x20

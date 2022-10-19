@@ -3,18 +3,10 @@
 
 #include <stdint.h>
 
-class VGA
+namespace VGA
 {
-	public:
-		VGA(void);
-
-		void putc (const char c);
-		void puts (const char* const str);
-
-	private:
-		volatile uint16_t* m_vgaRam;
-		unsigned int m_vgaBufferPosX;
-		unsigned int m_vgaBufferPosY;
+	void putc (const char c);
+	void puts (const char* const str);
 };
 
 #endif
