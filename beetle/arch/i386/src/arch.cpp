@@ -32,18 +32,17 @@ struct tdescriptor {
 //Those symbols need to be accessible from assembly file preinit.s
 extern "C" {
 	descriptor_t gdt[10] __attribute__((aligned(64))) =
-			{
-				0,//First entry in the GDT is null
-				CreateDescriptor(0,0xFFFFFFFF,DESCRIPTOR::EXECUTE_R,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//Kernel code
-				CreateDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//Kernel data
-				CreateDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b)//Kernel stack
-			};
+	{
+		0,//Intel documentation : first entry in GDT mus be null
+		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::EXECUTE_R,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//Kernel code
+		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//Kernel data
+		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//Kernel stack
+	};
 	descriptor_t idt[256] __attribute__((aligned(64)));
-	tdescriptor gdtr { .count=sizeof(gdt)/sizeof(gdt[0]), .base=(uint32_t)gdt };
-	tdescriptor idtr { .count=sizeof(idt)/sizeof(idt[0]), .base=(uint32_t)idt };
-}
 
-static tinfo gdt_info, idt_info;
+	SystemTableRegisterDescription gdtr { .limit=sizeof(gdt), .linearBaseAddress=(uint32_t)gdt };
+	SystemTableRegisterDescription idtr { .limit=sizeof(idt), .linearBaseAddress=(uint32_t)idt };
+}
 
 // union GateDescriptor
 // {
@@ -157,11 +156,10 @@ static void initInt()
 
 void ARCH::init()
 {
-	gdt[0] = 0;//First gdt descriptor needs to be null
-	gdt_info.descriptors = gdt;
-	gdt_info.count = 1;
-	idt_info.descriptors = idt;
-	idt_info.count = 0;
+	//gdt_info.descriptors = gdt;
+	//gdt_info.count = 1;
+	//idt_info.descriptors = idt;
+	//idt_info.count = 0;
 
 	initInt();
 }

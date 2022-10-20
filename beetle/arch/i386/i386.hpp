@@ -20,8 +20,26 @@ namespace ARCH::I386 {
 
 		/* Types include the S flags */
 		enum TYPE{
+			/* SYSTEM TYPE */
+			//Reserved
+			SYSTEM_16b_TSSA=1,//16 birs TSS available
+			SYSTEM_LDT,
+			SYSTEM_16b_TSSB,
+			SYSTEM_16b_CG,
+			SYSTEM_TG,
+			SYSTEM_16b_IG,
+			SYSTEM_16b_TG,
+			//Reserved
+			SYSTEM_32b_TSSA=0b1001,
+			//Reserved
+			SYSTEM_32b_TSSB=0b1011,
+			SYSTEM_32b_TSSCG,
+			//Reserved
+			SYSTEM_32b_IG=0b1110,
+			SYSTEM_32b_TG,
+
 			/* DATA TYPE */
-			DATA_RO = 0,//Read-only
+			DATA_RO = 0b10000,//Read-only
 			DATA_ROA,//Read-only accessed
 			DATA_RW,//Read/write
 			DATA_RWA,//Read/write accessed
@@ -41,24 +59,6 @@ namespace ARCH::I386 {
 			EXECUTE_OAC,//Execute-only accessed conforming
 			EXECUTE_RC,//Execute/write conforming
 			EXECUTE_RAC,//Execute/write accessed conforming
-		
-			/* SYSTEM TYPE */
-			//Reserved
-			SYSTEM_16b_TSSA=0b10001,//16 birs TSS available
-			SYSTEM_LDT,
-			SYSTEM_16b_TSSB,
-			SYSTEM_16b_CG,
-			SYSTEM_TG,
-			SYSTEM_16b_IG,
-			SYSTEM_16b_TG,
-			//Reserved
-			SYSTEM_32b_TSSA=0b11001,
-			//Reserved
-			SYSTEM_32b_TSSB=0b11011,
-			SYSTEM_32b_TSSCG,
-			//Reserved
-			SYSTEM_32b_IG=0b11110,
-			SYSTEM_32b_TG
 		};
 	}
 #pragma endregion
@@ -66,22 +66,24 @@ namespace ARCH::I386 {
 #pragma region "Descriptor Operations"
 	using descriptor_t = uint64_t;
 
-	struct tinfo {
-		descriptor_t* descriptors;
-		unsigned int count;
-	};
+	struct SystemTableRegisterDescription {
+		uint16_t limit;
+		uint32_t linearBaseAddress;
+	} __attribute__((packed)) ;
 
-	constexpr descriptor_t CreateDescriptor(const uint32_t base, const uint32_t limit, ARCH::I386::DESCRIPTOR::TYPE type, const uint8_t DPL, const unsigned int G, const unsigned int DB)
+	constexpr descriptor_t CreateSegmentDescriptor(const uint32_t base, const uint32_t limit, ARCH::I386::DESCRIPTOR::TYPE type, const uint8_t DPL, const unsigned int G, const unsigned int DB)
 	{
 		const descriptor_t d1 = (uint16_t)limit;
 		const descriptor_t d2 = (uint16_t)base;
-		const descriptor_t d3 = ((base >> 16) & 0xFF) | (type | ((DPL | 0b1000) << 8));
-		const unsigned int other = (G << 4) | (DB << 3);
-		const descriptor_t d4 = ((limit >> 16) & 0xF) | (other << 4) | ((base >> 16) & 0xFF00);
+		const descriptor_t d3 = ((DPL | 0b1000) << 12) | (type << 8) | ((base >> 16) & 0xFF);
+
+		//avl and l put 0 because not used (l only meaningfull in 32e mode and avl not used by the OS)
+		const unsigned int other = (G << 3) | (DB << 2);
+		const descriptor_t d4 = ((base >> 16) & 0xFF00) | (other << 4) | ((limit >> 16) & 0xF) ;
 		return (d4 << 48) | (d3 << 32) | (d2 << 16) | d1;
 	}
 
-	void pushDescriptor(tinfo& i, const descriptor_t descriptor);
+	//void pushDescriptor(tinfo& i, const descriptor_t descriptor);
 #pragma endregion
 
 #pragma region "Port IO Operations"
