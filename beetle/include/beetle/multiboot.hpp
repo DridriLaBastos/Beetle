@@ -1,7 +1,7 @@
 #ifndef __MULTIBOOT_HPP__
 #define __MULTIBOOT_HPP__
 
-#include "../../../libc/stdint.h"
+#include <stdint.h>
 
 struct MultibootInformation {
 	uint32_t flags;

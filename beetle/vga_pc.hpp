@@ -5,7 +5,7 @@
 
 namespace VGA
 {
-	void putc (const char c);
+	void putc (const int c);
 	void puts (const char* const str);
 };
 
