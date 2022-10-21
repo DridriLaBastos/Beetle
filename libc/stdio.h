@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-int printf(const char* format, ...);
+int printf(const char* format, ...) __attribute__((format(printf,1,2))) ;
 
 int puts(const char* s);
 int putchar(int c);
