@@ -23,6 +23,34 @@ static void parseMultibootInfo(const MultibootInformation* const multibootInfo)
 {
 	puts("[BEETLE]: scanning boot environment");
 	const uint32_t multibootFlags = multibootInfo->flags;
+
+	printf("[BEETLE]: multiboot flags : ");
+	for (unsigned int i = 1 << 31; i != 0; i >>= 1)
+	{ putchar((i & multibootFlags) ? '1' : '0'); }
+	putchar('\n');
+
+	if (multibootFlags & (1 << 0)) {
+		printf("[BEETLE]: available memory: 0x%X to 0x%X\n", multibootInfo->mem_lower, multibootInfo->mem_upper);
+	}
+
+	if (multibootFlags & (1 << 1)) {
+		printf("[BEETLE]: boot device 0x%X\n", multibootInfo->boot_device);
+	}
+
+	if (multibootFlags & (1 << 2)){
+		printf("[BEETLE]: kernel args '%s'\n",multibootInfo->cmd_line);
+	}
+
+	if (multibootFlags & (1 << 3)) {
+		printf("[BEETLE]: %d submodule loaded\n",multibootInfo->mods_count);
+		printf("          load address : 0x%x\n",multibootInfo->mods_addr);
+	}
+
+	//The kernel exe has an elf file format, thus, because bit 4&5 are mutually exclusive
+	//only bit 5, for elf, must be set : no need to test bit 4
+	if (multibootFlags & (1 << 5)) {
+		printf("[BEETLE]: kernel executable loaded at address 0x%X\n",multibootInfo->addr);
+	}
 }
 
 extern "C" int kmain (const uint32_t eax, const MultibootInformation* const multibootInfo)

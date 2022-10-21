@@ -11,7 +11,17 @@ struct MultibootInformation {
 	uint32_t cmd_line;
 	uint32_t mods_count;
 	uint32_t mods_addr;
-	uint32_t other [87];
+	union {
+		uint32_t tabsize;
+		uint32_t num;
+	};
+	union {
+		uint32_t strsize;
+		uint32_t size;
+	};
+	uint32_t addr;
+	uint32_t shndx;
+	uint32_t other [83];
 
 } __attribute__((packed));
 
