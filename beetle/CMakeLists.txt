@@ -47,6 +47,7 @@ add_custom_command(TARGET beetle.elf POST_BUILD
 					COMMAND ${GRUB_MKRESCUE} ARGS -o beetle.iso iso
 					COMMAND ${NM} --demangle --numeric-sort beetle.elf > ${PROJECT_SOURCE_DIR}/../tmps.txt
 					COMMAND ${OBJDUMP} -d -M intel beetle.elf > ${PROJECT_SOURCE_DIR}/../tmpd.txt
+					COMMAND ${CMAKE_COMMAND} -E copy beetle.iso ${CMAKE_SOURCE_DIR}
 					BYPRODUCTS beetle.iso
 					)
 

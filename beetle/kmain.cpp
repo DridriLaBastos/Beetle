@@ -29,8 +29,11 @@ static void parseMultibootInfo(const MultibootInformation* const multibootInfo)
 	{ putchar((i & multibootFlags) ? '1' : '0'); }
 	putchar('\n');
 
+
 	if (multibootFlags & (1 << 0)) {
-		printf("[BEETLE]: available memory: 0x%X to 0x%X\n", multibootInfo->mem_lower, multibootInfo->mem_upper);
+		printf("[BEETLE]: lower memory available : %dkb\n", multibootInfo->mem_lower);
+		printf("[BEETLE]: upper memory available : %dmb\n", multibootInfo->mem_upper / 1024);
+		printf("[BEETLE]: total memory available : %dmb\n", (multibootInfo->mem_lower + multibootInfo->mem_upper)/1024);
 	}
 
 	if (multibootFlags & (1 << 1)) {
@@ -43,7 +46,11 @@ static void parseMultibootInfo(const MultibootInformation* const multibootInfo)
 
 	if (multibootFlags & (1 << 3)) {
 		printf("[BEETLE]: %d submodule loaded\n",multibootInfo->mods_count);
-		printf("          load address : 0x%x\n",multibootInfo->mods_addr);
+
+		MultibootModule* modules = (MultibootModule*)multibootInfo->mods_count;
+		for (unsigned int i = 0; i < multibootInfo->mods_count; ++i) {
+			printf(" * %d : '%s' at 0x%X\n",i,modules[i].mod_string, modules[i].mod_start);
+		}
 	}
 
 	//The kernel exe has an elf file format, thus, because bit 4&5 are mutually exclusive

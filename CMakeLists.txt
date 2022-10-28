@@ -15,6 +15,7 @@ set(CMAKE_ASM_NASM_OBJECT_FORMAT elf32)
 #TODO: Enable plugin when compile gnu binutils
 #set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE true)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto")
 
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/libc")
