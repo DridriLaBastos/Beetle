@@ -47,7 +47,7 @@ static void parseMultibootInfo(const MultibootInformation* const multibootInfo)
 	if (multibootFlags & (1 << 3)) {
 		printf("[BEETLE]: %d submodule loaded\n",multibootInfo->mods_count);
 
-		MultibootModule* modules = (MultibootModule*)multibootInfo->mods_count;
+		MultibootModule* modules = (MultibootModule*)multibootInfo->mods_addr;
 		for (unsigned int i = 0; i < multibootInfo->mods_count; ++i) {
 			printf(" * %d : '%s' at 0x%X\n",i,modules[i].mod_string, modules[i].mod_start);
 		}
