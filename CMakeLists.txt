@@ -16,11 +16,20 @@ set(CMAKE_ASM_NASM_OBJECT_FORMAT elf32)
 #set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE true)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto")
+add_link_options(-flto)
 
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/libc")
 
 add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:-march=i386>)
 
-add_subdirectory(beetle)
 add_subdirectory(libc)
+
+link_directories($<TARGET_FILE_DIR:c>)
+
+add_subdirectory(services)
+
+set(PMN_BINARY_PATH $<TARGET_FILE:pmn.elf> CACHE PATH "Path to the elf of the process management program")
+
+add_subdirectory(beetle)
+

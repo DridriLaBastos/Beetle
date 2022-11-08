@@ -16,9 +16,10 @@ set(BEETLE_PROJECT_NAME_REVISION "${PROJECT_NAME}.${PROJECT_VERSION}")
 file(WRITE ${PROJECT_BINARY_DIR}/iso/boot/grub/grub.cfg
 		"menuentry \"${BEETLE_PROJECT_NAME_REVISION}\" {
 			multiboot /boot/beetle.elf
+			module /bin/pmn.elf \"bonjour comment tu vas ?\"
 		}"
 	)
-#module /bin/pmn.elf \"${BEETLE_PMN_NAME}\"
+
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/iso/bin)
 
 file(GLOB CXX_SOURCES CONFIGURE_DEPENDS "*.cpp")
@@ -40,7 +41,7 @@ target_compile_definitions(beetle.elf PUBLIC BEETLE_PMN_NAME="${BEETLE_PMN_NAME}
 
 add_custom_command(TARGET beetle.elf POST_BUILD
 					COMMAND ${CMAKE_COMMAND} -E copy beetle.elf iso/boot/beetle.elf
-					#COMMAND ${CMAKE_COMMAND} -E copy services/process_manager/pmn.elf iso/bin/pmn.elf
+					COMMAND ${CMAKE_COMMAND} -E copy ${PMN_BINARY_PATH} iso/bin/pmn.elf
 					COMMAND ${GRUB_MKRESCUE} ARGS -o ${CMAKE_SOURCE_DIR}/beetle.iso iso
 					COMMAND ${NM} --demangle --numeric-sort beetle.elf > ${CMAKE_SOURCE_DIR}/tmps.txt
 					COMMAND ${OBJDUMP} -d -M intel beetle.elf > ${CMAKE_SOURCE_DIR}/tmpd.txt
