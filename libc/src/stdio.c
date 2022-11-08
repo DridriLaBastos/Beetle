@@ -9,19 +9,19 @@
 #include "../stdio.h"
 #include "../stdlib.h"
 
-#include "beetle/vga_pc_c_api.h"
+#include "../i386/vga_pc.h"
 
 static unsigned int printfCharWriten = 0;
 
 int puts(const char* s)
 {
-	vga_pc_c_puts(s);
+	vga_pc_puts(s);
 	return EXIT_SUCCESS;
 }
 
 int putchar (const int c)
 {
-	vga_pc_c_putc(c);
+	vga_pc_putc(c);
 	printfCharWriten += 1;
 	return EXIT_SUCCESS;
 }

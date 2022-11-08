@@ -1,16 +1,14 @@
-#include <stddef.h>
+#include "stddef.h"
+#include "i386/vga_pc.h"
 
-#include "vga_pc.hpp"
-#include "vga_pc_c_api.h"
-
-static constexpr unsigned int VGA_SCREEN_SIZE_X = 80;
-static constexpr unsigned int VGA_SCREEN_SIZE_Y = 25;
+#define VGA_SCREEN_SIZE_X 80
+#define VGA_SCREEN_SIZE_Y 25
 
 static uint16_t* vgaRam = (uint16_t*)0xB8000;
 static size_t vgaBufferPosX = 0;
 static size_t vgaBufferPosY = 0;
 
-void VGA::putc(const int c)
+void vga_pc_putc(const int c)
 {
 	if (c == '\n')
 		vgaBufferPosX = VGA_SCREEN_SIZE_X;
@@ -28,13 +26,10 @@ void VGA::putc(const int c)
 	vgaBufferPosX %= VGA_SCREEN_SIZE_X;
 }
 
-void VGA::puts(const char* const str)
+void vga_pc_puts(const char* const str)
 {
 	const char* tmp = str;
 	while (*tmp != '\0')
-		putc(*tmp++);
-	putc('\n');
+		vga_pc_putc(*tmp++);
+	vga_pc_putc('\n');
 }
-
-void vga_pc_c_puts(const char* s) { VGA::puts(s); }
-void vga_pc_c_putc(const int  c) { VGA::putc(c); }
