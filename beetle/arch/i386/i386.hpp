@@ -1,7 +1,7 @@
 #ifndef __I386_HPP__
 #define __I386_HPP__
 
-#include "../../../libc/stdint.h"
+#include <stdint.h>
 
 namespace ARCH::I386 {
 
@@ -22,7 +22,7 @@ namespace ARCH::I386 {
 		enum TYPE{
 			/* SYSTEM TYPE */
 			//Reserved
-			SYSTEM_16b_TSSA=1,//16 birs TSS available
+			SYSTEM_16b_TSSA=1,//16 bit TSS available
 			SYSTEM_LDT,
 			SYSTEM_16b_TSSB,
 			SYSTEM_16b_CG,
@@ -82,6 +82,9 @@ namespace ARCH::I386 {
 		const descriptor_t d4 = ((base >> 16) & 0xFF00) | (other << 4) | ((limit >> 16) & 0xF) ;
 		return (d4 << 48) | (d3 << 32) | (d2 << 16) | d1;
 	}
+
+	constexpr descriptor_t CreateTSSDescriptor(const uint32_t base, const uint32_t limit, const uint8_t DPL, const unsigned int G, const unsigned int DB)
+	{ return CreateSegmentDescriptor(base,limit,ARCH::I386::DESCRIPTOR::TYPE::SYSTEM_32b_TSSA,DPL,G,DB); }
 
 	//void pushDescriptor(tinfo& i, const descriptor_t descriptor);
 #pragma endregion
@@ -155,6 +158,29 @@ namespace ARCH::I386 {
 	__attribute__((interrupt)) void irq13 (const void* ptr);
 	__attribute__((interrupt)) void irq14 (const void* ptr);
 	//__attribute__((interrupt)) void irq15 (const void* ptr); reserved
+#pragma endregion
+
+#pragma region "Task management"
+
+	struct TSS{
+		uint16_t tslink,_tslink_unused;
+		uint32_t esp0;
+		uint16_t ss0, _ss0_unused;
+		uint32_t esp1;
+		uint16_t ss1, _ss1_ununsed;
+		uint32_t esp2;
+		uint16_t ss2, _ss2_unused;
+		uint32_t cr3,eip,eflags,eax,ecx,edx,ebx,esp,ebp,esi,edi;
+		uint16_t es, _es_unused;
+		uint16_t cs, _cs_unused;
+		uint16_t ss, _ss_unused;
+		uint16_t ds, _ds_unused;
+		uint16_t fs, _fs_unused;
+		uint16_t gs, _gs_unused;
+		uint16_t ldt, _ldt_unused;
+		uint16_t t:1,_iomap_unused:15,iomap;
+	} __attribute__((packed));
+
 #pragma endregion
 }
 

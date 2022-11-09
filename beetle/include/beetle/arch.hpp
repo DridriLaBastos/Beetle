@@ -5,7 +5,7 @@
  * This file defines all the functions that the kernel requires an arch to implements
  */
 
-#include "../../../libc/stdint.h"
+#include <stdint.h>
 
 namespace ARCH
 {

@@ -29,14 +29,23 @@ struct tdescriptor {
 	uint32_t base;
 } __attribute__((packed));
 
+static TSS tss;
+
 //Those symbols need to be accessible from assembly file preinit.s
 extern "C" {
-	descriptor_t gdt[10] __attribute__((aligned(64))) =
+	descriptor_t gdt[16] __attribute__((aligned(64))) =
 	{
 		0,//Intel documentation : first entry in GDT mus be null
 		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::EXECUTE_R,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//Kernel code
 		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//Kernel data
 		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//Kernel stack
+
+		0,
+		//CreateTSSDescriptor((uint32_t)&tss,sizeof(tss)-1,4,0,DESCRIPTOR::SIZE_32b),
+
+		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::EXECUTE_R,DESCRIPTOR::PRIVILEGE3,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//User code segment
+		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE3,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//User data segment
+		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE3,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b) //User stack
 	};
 	descriptor_t idt[256] __attribute__((aligned(64)));
 
@@ -156,6 +165,27 @@ static void initInt()
 
 void ARCH::init()
 {
+	//Enable caching
+	__asm__("movl %%cr0, %%eax\n"
+			"andl $~0x60000000, %%eax\n"
+			"movl %%eax, %%cr0\n" :::"eax");
+
+	gdt[4] = CreateTSSDescriptor((uint32_t)&tss,sizeof(tss)-1,4,0,DESCRIPTOR::SIZE_32b);
+
+	// Fill the static values of the tss to describe the values for the current kernel task
+	//TODO: is it needed to also change version 1 and 2 of the ss and esp fields ?
+	__asm__("mov %%cr3, %%eax\n"
+		"movl %%eax, %0\n"
+		"movl %%esp, %1\n"
+		"movw %%ss, %2\n"
+		"movw $0, %3\n"::
+		"m"(tss.cr3), "m" (tss.esp0), "m" (tss.ss0), "m"(tss.iomap):
+		"eax");
+
+	//Change the ltr register to contain the selector for the kernel task
+	__asm__("movw %0, %%ax\n"
+			"ltr %%ax\n"::"i"(4 << 3) : "ax");
+
 	//gdt_info.descriptors = gdt;
 	//gdt_info.count = 1;
 	//idt_info.descriptors = idt;
@@ -169,7 +199,7 @@ void __attribute__((noreturn)) ARCH::endlessLoop()
 	while (true)
 	{
 		//asm ("xchg %bx, %bx");
-		asm ("hlt");
+		__asm__ ("hlt");
 	}
 }
 
@@ -178,5 +208,17 @@ void __attribute__((noreturn)) ARCH::endlessLoop()
  */
 void ARCH::moveToUserLand(const uint32_t logicalAddress)
 {
+	const unsigned int codeSegmentDescriptor = (4 << 3) + 3;
+	const unsigned int dataSegmentGDTIndex   = (5 << 3) + 3;
+	const unsigned int stackSegmentGDTIndex  = (6 << 3) + 3;
 
+	__asm__(
+			"mov %0, %%eax\n"
+			"mov %%ax, %%ds\n"
+			"mov %%ax, %%es\n"
+			"mov %%ax, %%fs\n"
+			"mov %%ax, %%gs\n"
+
+			"mov %1, %%ax\n"
+			"mov %%ax, %%ss\n": /*no output*/ : "i" (dataSegmentGDTIndex), "i" (stackSegmentGDTIndex) : "eax");
 }
