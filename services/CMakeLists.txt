@@ -1,4 +1,3 @@
-add_compile_options(-v)
-add_link_options(-v)
+add_link_options("--sysroot=${CMAKE_SYSROOT}")
 
 add_subdirectory(pmn)

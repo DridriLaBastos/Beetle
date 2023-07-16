@@ -16,6 +16,14 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE true)
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/libc")
 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/sysroot)
+
+set(MISC_OBJ_FILES
+	${PROJECT_BINARY_DIR}/libc/misc/crt0.o
+	${PROJECT_BINARY_DIR}/libc/misc/crti.o
+	${PROJECT_BINARY_DIR}/libc/misc/crtn.o
+)
+
 add_subdirectory(libc)
 add_subdirectory(services)
 

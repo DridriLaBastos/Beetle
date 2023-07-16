@@ -14,6 +14,9 @@ set(SIZE_EXEC ${TARGET_GNU_PREFIX}size)
 set(CMAKE_C_FLAGS_INIT "-m32 -march=i386 -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_INIT "${CMAKE_C_FLAGS_INIT}")
 
+set(CMAKE_SYSROOT ${CMAKE_BINARY_DIR}/sysroot)
+file(MAKE_DIRECTORY ${CMAKE_SYSROOT})
+
 # The development compiler installed is not abble to compile a simple program without additional flags (libc start and
 # end routines are not provided at this stage). We tell cmake that the compilers are working, when needed, they will be
 # tested with the right flags

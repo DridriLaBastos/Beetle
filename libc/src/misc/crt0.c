@@ -3,7 +3,12 @@
 //
 
 extern int main();
+extern void _init();
+extern void _fini();
 
 int _start(int argc, const char** argv){
-	return main(argc, argv);
+	_init();
+	const int ret = main(argc,argv);
+	_fini();
+	return ret;
 }
