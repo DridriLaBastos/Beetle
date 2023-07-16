@@ -25,3 +25,11 @@ int strncmp (const char* s1, const char* s2, size_t n)
 
 	return cmp;
 }
+
+void* memset(void* dest, int value, size_t len)
+{
+	const unsigned char v = (unsigned char)value;
+
+	for (size_t i = 0; i < len; i += 1)
+	{ ((unsigned char*)dest)[i] = v; }
+}

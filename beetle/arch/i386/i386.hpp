@@ -18,6 +18,14 @@ namespace ARCH::I386 {
 		constexpr unsigned int SIZE_16b = 0;
 		constexpr unsigned int SIZE_32b = 1;
 
+		enum SELECTOR_TYPE { GDT=0, LDT=1 };
+
+		constexpr unsigned int SEGMENT_SELECTOR(const unsigned int index, const unsigned int rpl, const SELECTOR_TYPE type = GDT)
+		{
+			//TODO: perform assertion
+			return ((index & 0x1FFF) << 3) | ((type & 1) << 2) | (rpl & 0b11);
+		}
+
 		/* Types include the S flags */
 		enum TYPE{
 			/* SYSTEM TYPE */
@@ -66,6 +74,11 @@ namespace ARCH::I386 {
 #pragma region "Descriptor Operations"
 	using descriptor_t = uint64_t;
 
+	struct DescriptorVerbose
+	{
+		uint64_t limit_1:16,base_1:16,base_2:8,type:5,dpl:2,p:1,limit_2:4,avl:1,l:1,db:1,g:1,base_3:8;
+	} __attribute__((packed));
+
 	struct SystemTableRegisterDescription {
 		uint16_t limit;
 		uint32_t linearBaseAddress;
@@ -83,8 +96,11 @@ namespace ARCH::I386 {
 		return (d4 << 48) | (d3 << 32) | (d2 << 16) | d1;
 	}
 
-	constexpr descriptor_t CreateTSSDescriptor(const uint32_t base, const uint32_t limit, const uint8_t DPL, const unsigned int G, const unsigned int DB)
-	{ return CreateSegmentDescriptor(base,limit,ARCH::I386::DESCRIPTOR::TYPE::SYSTEM_32b_TSSA,DPL,G,DB); }
+	constexpr descriptor_t CreateTSSDescriptor(const uint32_t base, const uint32_t limit, const uint8_t DPL)
+	{ return CreateSegmentDescriptor(base,limit,ARCH::I386::DESCRIPTOR::TYPE::SYSTEM_32b_TSSA,DPL,0,0); }
+
+	constexpr descriptor_t CreateTaskSwitchDescriptor(const uint16_t TSSSegmentSelector, const unsigned int dpl)
+	{ return CreateSegmentDescriptor(0,TSSSegmentSelector,ARCH::I386::DESCRIPTOR::TYPE::SYSTEM_32b_TG,dpl,0,0); }
 
 	//void pushDescriptor(tinfo& i, const descriptor_t descriptor);
 #pragma endregion

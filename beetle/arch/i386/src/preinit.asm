@@ -6,6 +6,7 @@ extern kmain,gdt,idt,gdtr,idtr
 
 global preinit
 preinit:
+	xchg bx, bx
 	mov edi, eax ;eax must contain a multiboot value put here by the loader. eax is saved to be passed to kmain
 	mov esi, ebx ;edx contrains the address of the multiboot info data struct. edx is saved to be passed to kmain.
 
@@ -46,6 +47,7 @@ preinit:
 	push esi
 	push edi
 	call kmain
+
 	cli ;If ever we returns from kmain it means that something bad happened
 
 	.loop:

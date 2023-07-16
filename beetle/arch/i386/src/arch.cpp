@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "beetle/arch.hpp"
 
 #include "i386.hpp"
@@ -29,23 +31,25 @@ struct tdescriptor {
 	uint32_t base;
 } __attribute__((packed));
 
-static TSS tss;
+struct FarPointer
+{
+	uint32_t offset;
+	uint16_t selector;
+} __attribute__((packed));
 
 //Those symbols need to be accessible from assembly file preinit.s
 extern "C" {
 	descriptor_t gdt[16] __attribute__((aligned(64))) =
 	{
 		0,//Intel documentation : first entry in GDT mus be null
+		//Conforming code segment because we want the CPL to change when transferring program to the cose segments
 		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::EXECUTE_R,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//Kernel code
 		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//Kernel data
 		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE0,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//Kernel stack
 
-		0,
-		//CreateTSSDescriptor((uint32_t)&tss,sizeof(tss)-1,4,0,DESCRIPTOR::SIZE_32b),
-
 		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::EXECUTE_R,DESCRIPTOR::PRIVILEGE3,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//User code segment
 		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE3,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b),//User data segment
-		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE3,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b) //User stack
+		CreateSegmentDescriptor(0,0xFFFFFFFF,DESCRIPTOR::DATA_RW,DESCRIPTOR::PRIVILEGE3,DESCRIPTOR::GRANULARITY_4K,DESCRIPTOR::SIZE_32b), //User stack
 	};
 	descriptor_t idt[256] __attribute__((aligned(64)));
 
@@ -101,27 +105,27 @@ extern "C" {
 static void initInt()
 {
 	/* Initialisation of système interruptions */
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptDE,0x8,ARCH::I386::PRIVILEGE0,1),0);
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptDB,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptNMI,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptBP,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptOF,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptBR,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptUD,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptNM,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptDF,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptCS,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptTS,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptNP,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptSS,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptGP,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptPF,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createNullGate());
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptMF,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptAC,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptMC,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptXM,0x8,ARCH::I386::PRIVILEGE0,1));
-	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptVE,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptDE,0x8,ARCH::I386::PRIVILEGE0,1),0);
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptDB,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptNMI,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptBP,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptOF,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptBR,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptUD,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptNM,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptDF,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptCS,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptTS,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptNP,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptSS,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptGP,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptPF,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createNullGate());
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptMF,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptAC,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptMC,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptXM,0x8,ARCH::I386::PRIVILEGE0,1));
+//	 IDT::push(createInterruptGate((uint32_t)ARCH::I386::interruptVE,0x8,ARCH::I386::PRIVILEGE0,1));
 
 	// /* Initialization of PIC interruptions */
 	// IDT::push(createInterruptGate((uint32_t)ARCH::I386::irq0,0x8,ARCH::I386::PRIVILEGE0,1), 0xB0);
@@ -163,35 +167,51 @@ static void initInt()
 	outb(~0,0xA1);
 }
 
+static TSS kernelTss;
+static TSS userTss;
+
+struct DescriptorTableInfo
+{
+	ARCH::I386::descriptor_t* descriptors;
+	size_t index;
+};
+
+static DescriptorTableInfo GDTInfo;
+
+static size_t appendDescriptor(DescriptorTableInfo& descriptorTable, const descriptor_t& descriptor)
+{
+	const size_t insertIndex = descriptorTable.index;
+	descriptorTable.descriptors[insertIndex] = descriptor;
+	descriptorTable.index += 1;
+	return insertIndex;
+}
+
 void ARCH::init()
 {
-	//Enable caching
-	__asm__("movl %%cr0, %%eax\n"
-			"andl $~0x60000000, %%eax\n"
-			"movl %%eax, %%cr0\n" :::"eax");
+	GDTInfo.descriptors = gdt;
+	GDTInfo.index = 7;
+	//x86 first init step is to override the previous TSS and create a new one to store informations
+	//for the kernel tak after task switching
+	memset(&kernelTss,0,sizeof(kernelTss));
 
-	gdt[4] = CreateTSSDescriptor((uint32_t)&tss,sizeof(tss)-1,4,0,DESCRIPTOR::SIZE_32b);
+	appendDescriptor(GDTInfo, CreateTSSDescriptor((uintptr_t )&kernelTss,sizeof(kernelTss)-1,DESCRIPTOR::PRIVILEGE0));
 
-	// Fill the static values of the tss to describe the values for the current kernel task
-	//TODO: is it needed to also change version 1 and 2 of the ss and esp fields ?
-	__asm__("mov %%cr3, %%eax\n"
-		"movl %%eax, %0\n"
-		"movl %%esp, %1\n"
-		"movw %%ss, %2\n"
-		"movw $0, %3\n"::
-		"m"(tss.cr3), "m" (tss.esp0), "m" (tss.ss0), "m"(tss.iomap):
-		"eax");
+	__asm__("movl %%cr3, %%eax\n"
+			"movl %%eax, %0\n"
+			::"m"(kernelTss.cr3):"eax");
+
+	//preparing the user tss
+	memset(&userTss,0,sizeof(userTss));
+
+#if 0
 
 	//Change the ltr register to contain the selector for the kernel task
 	__asm__("movw %0, %%ax\n"
 			"ltr %%ax\n"::"i"(4 << 3) : "ax");
 
-	//gdt_info.descriptors = gdt;
-	//gdt_info.count = 1;
-	//idt_info.descriptors = idt;
-	//idt_info.count = 0;
+#endif
 
-	initInt();
+	//initInt();
 }
 
 void __attribute__((noreturn)) ARCH::endlessLoop()
@@ -203,22 +223,44 @@ void __attribute__((noreturn)) ARCH::endlessLoop()
 	}
 }
 
-/**
- * On x86 transferring execution to user land means jumping from a priviledged code segment to an unprivileged one.
- */
-void ARCH::moveToUserLand(const uint32_t logicalAddress)
+ARCH::task_t ARCH::TASK::task_createUserLand(const void *entryPoint)
 {
-	const unsigned int codeSegmentDescriptor = (4 << 3) + 3;
-	const unsigned int dataSegmentGDTIndex   = (5 << 3) + 3;
-	const unsigned int stackSegmentGDTIndex  = (6 << 3) + 3;
+	//Code segment for task are all non conforming : they can only be accessed by task with a CPL = to the DPL of the
+	//segment. They need to be conforming because when switching we want the CPL to change. For the switch to perform
+	//when a task use a non-conforming code segment, it is mandatory to pass throught a call gate (a task gate). So
+	//when a new task is created two entries are added inside the GDT : a TSS Descriptor that references the TSS and
+	//a task-gate descriptor that is pointing to the previous TSS. The value returned is the index of the Task Gate
+	//descriptor so when performing a task switch this value can directly be used
+	const size_t insertedPos = appendDescriptor(GDTInfo, CreateTSSDescriptor((uintptr_t)&userTss,sizeof(userTss),DESCRIPTOR::PRIVILEGE3));
 
-	__asm__(
-			"mov %0, %%eax\n"
-			"mov %%ax, %%ds\n"
-			"mov %%ax, %%es\n"
-			"mov %%ax, %%fs\n"
-			"mov %%ax, %%gs\n"
+	const unsigned int taskSelector = DESCRIPTOR::SEGMENT_SELECTOR(insertedPos,DESCRIPTOR::PRIVILEGE3);
+	//Only code in priviledge level 0 are authorized to access code segment from a task switch
+	const size_t taskOpaqueDescriptor = appendDescriptor(GDTInfo, CreateTaskSwitchDescriptor(taskSelector,DESCRIPTOR::PRIVILEGE0));
 
-			"mov %1, %%ax\n"
-			"mov %%ax, %%ss\n": /*no output*/ : "i" (dataSegmentGDTIndex), "i" (stackSegmentGDTIndex) : "eax");
+	memset(&userTss,0,sizeof(userTss));
+
+	userTss.cs = DESCRIPTOR::SEGMENT_SELECTOR(4,DESCRIPTOR::PRIVILEGE3);
+	userTss.ds = DESCRIPTOR::SEGMENT_SELECTOR(5,DESCRIPTOR::PRIVILEGE3);
+	userTss.ss = DESCRIPTOR::SEGMENT_SELECTOR(6,DESCRIPTOR::PRIVILEGE3);
+	userTss.es = userTss.ds;
+	userTss.fs = userTss.ds;
+	userTss.gs = userTss.ds;
+	userTss.esp = 0x2000000;
+	userTss.eip = (uintptr_t)entryPoint;
+
+	//__asm__("xchg %%bx,%%bx\n"
+	//		"movl %0, %%eax\n" :: "i"(&userTss) : "eax");
+
+	return taskOpaqueDescriptor;
+}
+
+void ARCH::TASK::task_switch(const task_t t)
+{
+	FarPointer ptr;
+	ptr.selector = (gdt[t] >> 16) & 0xFFFF;
+	//TODO: Can this offset be 0 ?
+	ptr.offset = 0;
+
+	__asm__("xchg %%bx, %%bx\n"
+			"ljmp *%0" ::"m"(ptr): "ax");
 }

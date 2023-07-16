@@ -4,5 +4,11 @@
 		"idtr",
 		"preinit",
 		"tdescriptor"
-	]
+	],
+
+	"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+	"cmake.configureArgs": ["-DCMAKE_TOOLCHAIN_FILE=${workspaceFolder}/toolchain.cmake"],
+	"files.associations": {
+		"stdint-gcc.h": "c"
+	},
 }
