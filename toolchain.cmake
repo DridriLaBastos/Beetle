@@ -2,7 +2,7 @@ set(CMAKE_SYSTEM_NAME Beetle)
 set(CMAKE_SYSTEM_PROCESSOR i386)
 set(CMAKE_SYSTEM_VERSION 0.0.1)
 
-if (NOT ${LINUX})
+if (NOT LINUX)
 	set(TARGET_GNU_PREFIX "i686-elf-")
 endif()
 set(CMAKE_C_COMPILER ${TARGET_GNU_PREFIX}gcc)
@@ -15,6 +15,7 @@ set(CMAKE_C_FLAGS_INIT "-m32 -march=i386 -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_INIT "${CMAKE_C_FLAGS_INIT}")
 
 set(CMAKE_SYSROOT ${CMAKE_BINARY_DIR}/sysroot)
+set(CMAKE_SYSROOT_USR_LIB ${CMAKE_SYSROOT}/usr/lib)
 file(MAKE_DIRECTORY ${CMAKE_SYSROOT})
 
 # The development compiler installed is not abble to compile a simple program without additional flags (libc start and
