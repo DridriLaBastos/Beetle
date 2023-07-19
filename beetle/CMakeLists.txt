@@ -25,7 +25,7 @@ add_executable(beetle ${CXX_SOURCES} ${ASM_SOURCES} $<TARGET_OBJECTS:${TARGET}>)
 file(WRITE ${PROJECT_BINARY_DIR}/iso/boot/grub/grub.cfg
 		"menuentry \"${BEETLE_PROJECT_NAME_REVISION}\" {
 			multiboot /boot/beetle
-			# module /bin/pmn.elf \"bonjour comment tu vas ?\"
+			module /bin/pmn.elf
 		}"
 	)
 
@@ -41,7 +41,7 @@ add_custom_command(TARGET beetle POST_BUILD
 					COMMAND ${CMAKE_COMMAND} -E echo "* * * CREATING ISO * * *"
 					COMMAND ${SIZE_EXEC} $<TARGET_FILE:beetle>
 					COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:beetle> iso/boot/$<TARGET_FILE_NAME:beetle>
-					# # COMMAND ${CMAKE_COMMAND} -E copy ${PMN_BINARY_PATH} iso/bin/pmn.elf
+					COMMAND ${CMAKE_COMMAND} -E copy ${PMN_BINARY_PATH} iso/bin/pmn.elf
 					COMMAND ${GRUB_MKRESCUE} ARGS -o ${CMAKE_SOURCE_DIR}/beetle.iso iso
 					COMMAND ${NM} --demangle --numeric-sort $<TARGET_FILE:beetle> > ${CMAKE_SOURCE_DIR}/tmps.txt
 					COMMAND ${OBJDUMP} -d -M intel $<TARGET_FILE:beetle> > ${CMAKE_SOURCE_DIR}/tmpd.txt
