@@ -32,4 +32,6 @@ void* memset(void* dest, int value, size_t len)
 
 	for (size_t i = 0; i < len; i += 1)
 	{ ((unsigned char*)dest)[i] = v; }
+
+	return dest;
 }
