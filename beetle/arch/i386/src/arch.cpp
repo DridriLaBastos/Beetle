@@ -218,7 +218,6 @@ void __attribute__((noreturn)) ARCH::endlessLoop()
 {
 	while (true)
 	{
-		//asm ("xchg %bx, %bx");
 		__asm__ ("hlt");
 	}
 }
