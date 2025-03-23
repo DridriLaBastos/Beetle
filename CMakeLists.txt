@@ -37,19 +37,20 @@ file(WRITE ${PROJECT_BINARY_DIR}/grub.cfg
 		}"
 	)
 
-add_custom_command(OUTPUT beetle.iso
-					COMMENT "Creating iso image"
-					COMMAND ${CMAKE_COMMAND} -E rm -Rf iso
-					COMMAND ${CMAKE_COMMAND} -E make_directory iso
-					COMMAND ${CMAKE_COMMAND} -E copy grub.cfg iso/boot/grub/grub.cfg
-					COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:beetle> iso/boot/beetle
-					COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pm> iso/bin/pm
-					COMMAND ${GRUB_MKRESCUE} -o ${CMAKE_SOURCE_DIR}/beetle.iso iso)
-
-# Create an iso boot image
+	add_custom_command(OUTPUT beetle.iso
+	COMMENT "Creating iso image"
+	COMMAND ${CMAKE_COMMAND} -E rm -Rf iso
+	COMMAND ${CMAKE_COMMAND} -E make_directory iso
+	COMMAND ${CMAKE_COMMAND} -E copy grub.cfg iso/boot/grub/grub.cfg
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:beetle> iso/boot/beetle
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pm> iso/bin/pm
+	COMMAND ${GRUB_MKRESCUE} -o ${CMAKE_SOURCE_DIR}/beetle.iso iso)
+	
+	# Create an iso boot image
+#TODO: This should also depend on grub.cfg so that if I want to modify the content of the file it is automatically regenerated
 add_custom_target(iso DEPENDS beetle.iso)
 
 add_custom_target(run 
 					COMMAND bochs -q
 					WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-					DEPENDS beetle.iso)
+					DEPENDS iso)
