@@ -7,7 +7,11 @@
 	],
 
 	"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-	"cmake.configureArgs": ["-DCMAKE_TOOLCHAIN_FILE=${workspaceFolder}/toolchain.cmake"],
+	"cmake.configureArgs": [
+		"-DCMAKE_TOOLCHAIN_FILE=${workspaceFolder}/toolchain.cmake",
+		"-DBEETLE_TARGET=i386",
+		"-DBEETLE_PLATFORM=pc"
+	],
 	"files.associations": {
 		"stdint-gcc.h": "c"
 	},
