@@ -7,3 +7,5 @@ add_library(kc STATIC
 				src/arch/${BEETLE_TARGET}_${BEETLE_PLATFORM}.c)
 
 target_include_directories(kc SYSTEM PUBLIC ${PROJECT_SOURCE_DIR}/include PRIVATE ${PROJECT_SOURCE_DIR})
+
+target_link_libraries(kc PRIVATE ksys)
