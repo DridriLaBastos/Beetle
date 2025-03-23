@@ -2,7 +2,7 @@
 
 #include "kstdio.h"
 
-int printf(const char* format, ...)
+int kprintf(const char* format, ...)
 {
 	va_list args;
 

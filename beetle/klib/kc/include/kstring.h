@@ -1,11 +1,11 @@
 #ifndef KERNEL_STRING_H
 #define KERNEL_STRING_H
 
+#include "kstddef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "kstddef.h"
 
 void* kmemset(void* dest, int c, size_t len);
 

@@ -3,18 +3,18 @@
 
 #include <stdarg.h>
 
-int putchar (const int c)
+int kputchar (const int c)
 {
 	kc_putchar(c);
 	return 1;
 }
 
-int puts (const char* s)
+int kputs (const char* s)
 {
 	unsigned int accumulate = 0;
 	while (*s)
 	{
-		putchar(*s);
+		kputchar(*s);
 		++accumulate;
 		++s;
 	}
