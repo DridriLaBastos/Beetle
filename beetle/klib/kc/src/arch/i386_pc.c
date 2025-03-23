@@ -29,3 +29,8 @@ void kc_putchar (const int c)
 	vgaBufferPosY += vgaBufferPosX / VGA_SCREEN_SIZE_X;
 	vgaBufferPosX %= VGA_SCREEN_SIZE_X;
 }
+
+void kc_cursor_update()
+{
+	
+}

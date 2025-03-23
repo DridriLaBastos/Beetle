@@ -6,6 +6,7 @@
 int kputchar (const int c)
 {
 	kc_putchar(c);
+	kc_cursor_update();
 	return 1;
 }
 
@@ -19,6 +20,7 @@ int kputs (const char* s)
 		++s;
 	}
 	kputchar('\n');
+	kc_cursor_update();
 
 	return accumulate;
 }
