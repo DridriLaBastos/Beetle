@@ -1,1 +1,1 @@
-add_subdirectory(pmn)
+add_subdirectory(pm)
