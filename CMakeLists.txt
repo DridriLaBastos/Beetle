@@ -26,7 +26,30 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE true)
 # )
 
 # add_subdirectory(libc)
-# add_subdirectory(services)
 
 add_subdirectory(beetle)
+add_subdirectory(services)
 
+file(WRITE ${PROJECT_BINARY_DIR}/grub.cfg
+		"menuentry \"${BEETLE_PROJECT_NAME_REVISION}\" {
+			multiboot /boot/beetle
+			module /bin/pm
+		}"
+	)
+
+add_custom_command(OUTPUT beetle.iso
+					COMMENT "Creating iso image"
+					COMMAND ${CMAKE_COMMAND} -E rm -Rf iso
+					COMMAND ${CMAKE_COMMAND} -E make_directory iso
+					COMMAND ${CMAKE_COMMAND} -E copy grub.cfg iso/boot/grub/grub.cfg
+					COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:beetle> iso/boot/beetle
+					COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pm> iso/bin/pm
+					COMMAND ${GRUB_MKRESCUE} -o ${CMAKE_SOURCE_DIR}/beetle.iso iso)
+
+# Create an iso boot image
+add_custom_target(iso DEPENDS beetle.iso)
+
+add_custom_target(run 
+					COMMAND bochs -q
+					WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+					DEPENDS beetle.iso)

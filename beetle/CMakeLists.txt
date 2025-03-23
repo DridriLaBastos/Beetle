@@ -14,21 +14,12 @@ add_link_options(-nostdlib)
 add_subdirectory(klib)
 add_subdirectory(arch)
 
-set(BEETLE_PROJECT_NAME_REVISION "${PROJECT_NAME}.${PROJECT_VERSION}")
-
-file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/iso/bin)
+set(BEETLE_PROJECT_NAME_REVISION "${PROJECT_NAME}.${PROJECT_VERSION}" PARENT_SCOPE)
 
 file(GLOB CXX_SOURCES CONFIGURE_DEPENDS "*.cpp")
 file(GLOB ASM_SOURCES CONFIGURE_DEPENDS "*.asm")
 
 add_executable(beetle ${CXX_SOURCES} ${ASM_SOURCES} $<TARGET_OBJECTS:${BEETLE_TARGET}>)
-
-file(WRITE ${PROJECT_BINARY_DIR}/iso/boot/grub/grub.cfg
-		"menuentry \"${BEETLE_PROJECT_NAME_REVISION}\" {
-			multiboot /boot/beetle
-			module /bin/pmn.elf
-		}"
-	)
 
 target_link_libraries(beetle PRIVATE kc)
 
@@ -36,18 +27,7 @@ target_link_options(beetle
 					PRIVATE -Wl,--script=${PROJECT_SOURCE_DIR}/${BEETLE_TARGET}_${BEETLE_PLATFORM}_linker.ld
 					)
 
-target_compile_definitions(beetle PUBLIC BEETLE_PMN_NAME="${BEETLE_PMN_NAME}" BEETLE_VERSION_NAME="Beetle v${PROJECT_VERSION}")
-
 add_custom_command(TARGET beetle POST_BUILD
-					COMMAND ${CMAKE_COMMAND} -E echo "* * * CREATING ISO * * *"
+					COMMENT "beetle size"
 					COMMAND ${SIZE_EXEC} $<TARGET_FILE:beetle>
-					COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:beetle> iso/boot/$<TARGET_FILE_NAME:beetle>
-					COMMAND ${GRUB_MKRESCUE} ARGS -o ${CMAKE_SOURCE_DIR}/beetle.iso iso
-					COMMAND ${NM} --demangle --numeric-sort $<TARGET_FILE:beetle> > ${CMAKE_SOURCE_DIR}/tmps.txt
-					COMMAND ${OBJDUMP} -d -M intel $<TARGET_FILE:beetle> > ${CMAKE_SOURCE_DIR}/tmpd.txt
-					BYPRODUCTS beetle.iso
 					)
-
-add_custom_target(run COMMAND bochs -q
-					WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-					DEPENDS beetle)
