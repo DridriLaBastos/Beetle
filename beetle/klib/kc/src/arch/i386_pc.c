@@ -1,30 +1,31 @@
+#include <kstddef.h>
+
 #include <ksys/ksys.h>
 
 #include "arch/interface.h"
 
+#define VGA_SCREEN_SIZE_X 80
+#define VGA_SCREEN_SIZE_Y 25
+
+static uint16_t* vgaRam = (uint16_t*)0xB8000;
+static size_t vgaBufferPosX = 0;
+static size_t vgaBufferPosY = 0;
+
+//TODO: Update cursor position by writing to a register
 void kc_putchar (const int c)
 {
-	//Get current VGA cursor position
-	const uint16_t cursorPosition = kinw(0x3D4);
-	//Get the current VGA cursor position
-	const uint16_t cursorOffset = cursorPosition & 0xFF;
-	//Get the current VGA cursor page
-	const uint16_t cursorPage = cursorPosition >> 8;
-
-	//Output char to the VGA buffer
-	koutw(c | (0x0F << 8), 0xB8000 + cursorOffset + cursorPage * 80 * 2);
-
-	//Output new line if the cursor is at the end of the line
-	if (cursorOffset == 79)
-	{
-		//Move the cursor to the beginning of the next line
-		koutw(cursorPage << 8, 0x3D4);
-		koutw(0, 0x3D5);
-	}
+	if (c == '\n')
+		vgaBufferPosX = VGA_SCREEN_SIZE_X;
+	else if (c == '\t')
+		vgaBufferPosX += 4;
 	else
 	{
-		//Move the cursor to the next position
-		koutw(cursorOffset + 1, 0x3D4);
-		koutw(cursorPage, 0x3D5);
+		const uint8_t charToWrite = c;
+		const uint8_t color 		= 0b100;
+		const uint16_t valueToWrite = (color << 8) | charToWrite;
+		vgaRam[vgaBufferPosY*VGA_SCREEN_SIZE_X + vgaBufferPosX++] = valueToWrite;
 	}
+
+	vgaBufferPosY += vgaBufferPosX / VGA_SCREEN_SIZE_X;
+	vgaBufferPosX %= VGA_SCREEN_SIZE_X;
 }

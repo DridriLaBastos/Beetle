@@ -7,7 +7,6 @@
 	extern "C" {
 #endif
 
-
 typedef uint32_t size_t;
 
 #ifdef __cplusplus

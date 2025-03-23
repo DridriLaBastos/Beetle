@@ -18,6 +18,7 @@ int kputs (const char* s)
 		++accumulate;
 		++s;
 	}
+	kputchar('\n');
 
 	return accumulate;
 }
