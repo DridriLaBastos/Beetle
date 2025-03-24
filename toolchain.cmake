@@ -16,7 +16,10 @@ set(CMAKE_CXX_FLAGS_INIT "${CMAKE_C_FLAGS_INIT}")
 
 set(CMAKE_SYSROOT ${CMAKE_BINARY_DIR}/sysroot)
 set(CMAKE_SYSROOT_USR_LIB ${CMAKE_SYSROOT}/usr/lib)
-file(MAKE_DIRECTORY ${CMAKE_SYSROOT})
+set(CMAKE_SYSROOT_USR_INCLUDE ${CMAKE_SYSROOT}/usr/include)
+
+file(MAKE_DIRECTORY ${CMAKE_SYSROOT_USR_LIB})
+file(MAKE_DIRECTORY ${CMAKE_SYSROOT_USR_INCLUDE})
 
 # The development compiler installed is not abble to compile a simple program without additional flags (libc start and
 # end routines are not provided at this stage). We tell cmake that the compilers are working, when needed, they will be

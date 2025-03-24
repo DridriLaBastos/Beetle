@@ -1,25 +1,27 @@
 project("Beetle libC")
 
-file(GLOB LIBC_C_SRC CONFIGURE_DEPENDS src/*.c src/i386/*.c src/i386/*.asm)
-file(GLOB LIB_C_HDR *.h)
+add_library(crt0 OBJECT src/misc/crt0.c)
+add_library(crti OBJECT src/misc/crti.asm)
+add_library(crtn OBJECT src/misc/crtn.asm)
 
-message( "nasm extension : ${CMAKE_ASM_NASM_SOURCE_FILE_EXTENSIONS} asm extension : ${CMAKE_ASM_SOURCE_FILE_EXTENSIONS}" )
+add_library(c STATIC $<TARGET_OBJECTS:crt0> $<TARGET_OBJECTS:crti> $<TARGET_OBJECTS:crtn>)
 
-add_library(c STATIC ${LIBC_C_SRC} ${ARCH_ASM_SRC} ${LIB_C_HDR})
-add_library(kernelc STATIC ${LIBC_C_SRC} ${ARCH_ASM_SRC} ${LIB_C_HDR})
-add_library(misc OBJECT src/misc/crt0.c src/misc/crti.asm src/misc/crtn.asm)
+file(GLOB LIBC_STANDARD_HEADERS ${PROJECT_SOURCE_DIR}/include/*.h)
 
-add_dependencies(c misc)
+target_include_directories(c PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 # Remaking a sysroot
 # On my developments machine, some version of gcc asks for a libc.a or a libg.a. Both version should be a c library
 add_custom_command(TARGET c POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E echo "* * * MAKING SYSROOT * * *"
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/CMakeFiles/misc.dir/src/misc/crt0.c.obj ${CMAKE_SYSROOT_USR_LIB}/crt0.o
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/CMakeFiles/misc.dir/src/misc/crti.asm.obj ${CMAKE_SYSROOT_USR_LIB}/crti.o
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/CMakeFiles/misc.dir/src/misc/crtn.asm.obj ${CMAKE_SYSROOT_USR_LIB}/crtn.o
+	COMMENT "* * * Preparing User Land Sysroot * * *"
+	# COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/CMakeFiles/misc.dir/src/misc/crt0.c.obj ${CMAKE_SYSROOT_USR_LIB}/crt0.o
+	# COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/CMakeFiles/misc.dir/src/misc/crti.asm.obj ${CMAKE_SYSROOT_USR_LIB}/crti.o
+	# COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/CMakeFiles/misc.dir/src/misc/crtn.asm.obj ${CMAKE_SYSROOT_USR_LIB}/crtn.o
+	COMMAND ${CMAKE_COMMAND} -E copy ${LIBC_STANDARD_HEADERS} ${CMAKE_SYSROOT_USR_INCLUDE}
 	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:c> ${CMAKE_SYSROOT_USR_LIB}/libc.a
 	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:c> ${CMAKE_SYSROOT_USR_LIB}/libg.a
-)
 
-target_compile_options(kernelc PRIVATE -ffreestanding -fno-stack-protector)
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:crt0> ${CMAKE_SYSROOT_USR_LIB}/crt0.o
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:crti> ${CMAKE_SYSROOT_USR_LIB}/crti.o
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:crtn> ${CMAKE_SYSROOT_USR_LIB}/crtn.o
+	)
