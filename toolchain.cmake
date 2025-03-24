@@ -14,12 +14,12 @@ set(SIZE_EXEC ${TARGET_GNU_PREFIX}size)
 set(CMAKE_C_FLAGS_INIT "-m32 -march=i386 -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_INIT "${CMAKE_C_FLAGS_INIT}")
 
-set(CMAKE_SYSROOT ${CMAKE_BINARY_DIR}/sysroot)
-set(CMAKE_SYSROOT_USR_LIB ${CMAKE_SYSROOT}/usr/lib)
-set(CMAKE_SYSROOT_USR_INCLUDE ${CMAKE_SYSROOT}/usr/include)
+set(BEETLE_SYSROOT ${CMAKE_BINARY_DIR}/sysroot)
+set(BEETLE_SYSROOT_USR_LIB ${BEETLE_SYSROOT}/usr/lib)
+set(BEETLE_SYSROOT_USR_INCLUDE ${BEETLE_SYSROOT}/usr/include)
 
-file(MAKE_DIRECTORY ${CMAKE_SYSROOT_USR_LIB})
-file(MAKE_DIRECTORY ${CMAKE_SYSROOT_USR_INCLUDE})
+file(MAKE_DIRECTORY ${BEETLE_SYSROOT_USR_LIB})
+file(MAKE_DIRECTORY ${BEETLE_SYSROOT_USR_INCLUDE})
 
 # The development compiler installed is not abble to compile a simple program without additional flags (libc start and
 # end routines are not provided at this stage). We tell cmake that the compilers are working, when needed, they will be
