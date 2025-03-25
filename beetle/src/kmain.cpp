@@ -83,7 +83,7 @@ extern "C" int kmain (const uint32_t eax, const MultibootInformation* const mult
 
 	if (modules) {
 		Elf32_Ehdr* header = (Elf32_Ehdr*) modules[0].mod_start;
-		ARCH::moveToUserLand(header->e_entry);
+		ARCH::MoveToUserLand(header->e_entry);
 	}
 
 	kputs("[BEETLE]: resumed");

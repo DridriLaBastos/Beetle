@@ -16,7 +16,7 @@ namespace ARCH
 	 */
 	void init(void);
 	void endlessLoop(void);
-	void moveToUserLand(const uintptr_t linearAddress);
+	void MoveToUserLand(const uintptr_t linearAddress);
 }
 
 #endif
