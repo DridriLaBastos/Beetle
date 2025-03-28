@@ -2,7 +2,8 @@ project(beetle
 		VERSION 0.0.2
 		DESCRIPTION "The kernel for BeetleOS")
 
-include_directories(include)
+include_directories(SYSTEM include)
+include_directories(klib/include)
 
 # add_compile_options also add compile options for the nasm compiler and we don't want that
 set(COMMON_FLAGS "-ffreestanding -fno-stack-protector")
@@ -21,7 +22,7 @@ file(GLOB ASM_SOURCES CONFIGURE_DEPENDS "*.asm")
 
 add_executable(beetle ${CXX_SOURCES} ${ASM_SOURCES} $<TARGET_OBJECTS:${BEETLE_TARGET}>)
 
-target_link_libraries(beetle PRIVATE kc)
+target_link_libraries(beetle PRIVATE kc ${BEETLE_ARCH})
 
 target_link_options(beetle
 					PRIVATE -Wl,--script=${PROJECT_SOURCE_DIR}/${BEETLE_TARGET}_${BEETLE_PLATFORM}_linker.ld

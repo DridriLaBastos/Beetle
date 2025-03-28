@@ -67,7 +67,7 @@ extern "C" int kmain (const uint32_t eax, const MultibootInformation* const mult
 
 	kputs("[BEETLE]: successfully loaded");
 	kputs("[ARCH]: starting low level initialization");
-	ARCH::init();
+	ARCH::Init((void*)multibootInfo->mem_upper);
 
 	/**
 	 * Every capabilities of the operating system will be provided as services. The only purpose of the OS is
@@ -79,6 +79,6 @@ extern "C" int kmain (const uint32_t eax, const MultibootInformation* const mult
 	 */
 	parseMultibootInfo(multibootInfo);
 	boot_error:
-	ARCH::endlessLoop();
+	ARCH::EndlessLoop();
 	return 0;
 }
