@@ -2,11 +2,10 @@
 [CPU 386]
 ;The kernel will be loaded by GRUB.
 
-extern kmain,gdt,idt,gdtr,idtr
+extern kmain,gdt,idt,gdtr,idtr,PrepareProtected
 
 global preinit
 preinit:
-	xchg bx, bx
 	mov edi, eax ;eax must contain a multiboot value put here by the loader. eax is saved to be passed to kmain
 	mov esi, ebx ;edx contrains the address of the multiboot info data struct. edx is saved to be passed to kmain.
 
@@ -14,6 +13,8 @@ preinit:
 	out 0x21, al ;masking interrupts on PIC 1 
 	out 0xA1, al ;masking interrupts in PIC 2
 	cli ;disabling nmi while switching to protected mode
+
+	call PrepareProtected
 
 	lgdt [gdtr] ;Loading the gdtr structure created in arch.cpp
 
@@ -39,7 +40,7 @@ preinit:
 	;Loading privilege 0 stack segment
 	mov ax, 0x18
 	mov ss, ax
-	mov esp, 0x7FB00
+	mov esp, 0x80000
 
 	;Setting the stack frame for kmain
 	; first args = saved value of eax

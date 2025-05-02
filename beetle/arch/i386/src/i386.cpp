@@ -2,6 +2,8 @@
 
 #include <beetle/arch.hpp>
 
+#include <kstring.h>
+
 static constexpr unsigned int PRIVILEGE0 = 0;
 static constexpr unsigned int PRIVILEGE1 = 1;
 static constexpr unsigned int PRIVILEGE2 = 2;
@@ -60,43 +62,107 @@ enum class DESCRIPTOR_TYPE{
 };
 
 using descriptor_t = uint64_t;
+using segment_selector_t = uint16_t;
 
 struct SystemTableRegister {
 	uint16_t limit;
 	uint32_t linearBaseAddress;
-} __attribute__((packed)) ;
+} __attribute__((packed));
 
-static constexpr descriptor_t CreateSegmentDescriptor(const uint32_t base, const unsigned int limit, DESCRIPTOR_TYPE type, const uint8_t DPL, const unsigned int G, const unsigned int size)
+union USegmentDescriptor {
+	descriptor_t uival;
+
+	// The s flags is included in the type
+	struct {
+		uint64_t limit_15_0:16, base_23_0:24, type:5,dpl:2,p:1,limit_19_16:4, avl:1,l:1,db:1,g:1,base_31_24:8;
+	} fields;
+};
+
+union ULimitDescriptorField {
+	uint32_t uival;
+
+	struct {
+		uint32_t limit_15_0:16, limit_19_16:4, unused:12;
+	} fields ;
+};
+
+union UBaseDescriptorField {
+	uint32_t uival;
+
+	struct {
+		uint32_t base_23_0: 24, base_31_24:8;
+	} fields;
+};
+
+struct TSS{
+	uint16_t tslink,_tslink_unused;
+	uint32_t esp0;
+	uint16_t ss0, _ss0_unused;
+	uint32_t esp1;
+	uint16_t ss1, _ss1_ununsed;
+	uint32_t esp2;
+	uint16_t ss2, _ss2_unused;
+	uint32_t cr3,eip,eflags,eax,ecx,edx,ebx,esp,ebp,esi,edi;
+	uint16_t es, _es_unused;
+	uint16_t cs, _cs_unused;
+	uint16_t ss, _ss_unused;
+	uint16_t ds, _ds_unused;
+	uint16_t fs, _fs_unused;
+	uint16_t gs, _gs_unused;
+	uint16_t ldt, _ldt_unused;
+	uint16_t t:1,_iomap_unused:15,iomap;
+} __attribute__((packed));
+
+static constexpr USegmentDescriptor CreateSegmentDescriptor(const uint32_t base, const unsigned int limit, DESCRIPTOR_TYPE type, const uint8_t DPL, const unsigned int G, const unsigned int size)
 {
-	const descriptor_t d1 = static_cast<uint16_t>(limit);
-	const descriptor_t d2 = static_cast<uint16_t>(base);
-	const descriptor_t d3 = ((DPL | 0b1000) << 12) | (static_cast<int>(type) << 8) | ((base >> 16) & 0xFF);
+	UBaseDescriptorField baseFields { .uival = base };
+	ULimitDescriptorField limitFields { .uival = limit };
+	USegmentDescriptor descriptor { .uival = 0 };
 
-	//avl and l put 0 because not used (l only meaningful in 32e mode and avl not used by the OS)
-	const unsigned int other = (G << 3) | (size << 2);
-	const descriptor_t d4 = ((base >> 16) & 0xFF00) | (other << 4) | ((limit >> 16) & 0xF) ;
-	return (d4 << 48) | (d3 << 32) | (d2 << 16) | d1;
+	descriptor.fields.base_23_0 = baseFields.fields.base_23_0;
+	descriptor.fields.base_31_24 = baseFields.fields.base_31_24;
+
+	descriptor.fields.limit_15_0 = limitFields.fields.limit_15_0;
+	descriptor.fields.limit_19_16 = limitFields.fields.limit_19_16;
+
+	descriptor.fields.limit_15_0 = limitFields.fields.limit_15_0;
+	descriptor.fields.limit_19_16 = limitFields.fields.limit_19_16;
+
+	descriptor.fields.type = (unsigned int)type & 0b11111;
+	descriptor.fields.dpl = DPL & 0b11;
+	descriptor.fields.p = 1;
+	descriptor.fields.avl = 0;
+	descriptor.fields.l = 0;
+	descriptor.fields.db = size & 0b1;
+	descriptor.fields.g = G & 0b1;
+
+	return descriptor;
+}
+
+static constexpr USegmentDescriptor CreateTSSDescriptor(const uint32_t base)
+{
+	// From intel doc : 'when G flag is 0, the limit must 0x67 : one less than the minimum size of a TSS'
+	return CreateSegmentDescriptor(base,0x67,DESCRIPTOR_TYPE::SYSTEM_32b_TSSA,PRIVILEGE0,0,SIZE_32b);
+}
+
+union SegmentSelector {
+	segment_selector_t intvalue;
+
+	struct {
+		segment_selector_t rpl:2,ti:1,index:13;
+	};
+};
+
+static constexpr segment_selector_t CreateSegmentSelector(const unsigned int index, const unsigned int RPL, const bool ldt = false)
+{
+	//sanity check
+	static_assert(sizeof(SegmentSelector) == sizeof(segment_selector_t), "SegmentSelector union and segment_selector_t defined type sizes mismatched : the size for both must be 2 bytes (16bits)");
+	SegmentSelector ss { .rpl = RPL, .ti = ldt, .index = index };
+	return ss.intvalue;
 }
 
 extern "C" {
-	descriptor_t gdt [N_GDT_SELECTOR] = {
-		// From intel doc first entry in the GDT must be 0
-		0,
-		//kernel code
-		CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::EXECUTE_R,PRIVILEGE0,GRANULARITY_4K,SIZE_32b),
-		//kernel data
-		CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE0,GRANULARITY_4K,SIZE_32b),
-		//kernel stack need to be created depending on the available memory
-		CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE0,GRANULARITY_4K,SIZE_32b),
-
-		//user code
-		CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::EXECUTE_R,PRIVILEGE3,GRANULARITY_4K,SIZE_32b),
-		//user data
-		CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE3,GRANULARITY_4K,SIZE_32b),
-		//user stack needs to be created depending on the available memory
-		CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE3,GRANULARITY_4K,SIZE_32b),
-		0,
-	};
+	USegmentDescriptor gdt [N_GDT_SELECTOR];
 
 	descriptor_t idt [N_IDT_SELECTOR];
 
@@ -106,7 +172,9 @@ extern "C" {
 
 void ARCH::Init(void* firstAvailableMemory)
 {
-
+	//Sanity checks
+	static_assert(sizeof(void*) == sizeof(uint32_t), "Not compiling for i386 architecture : void* is greater than 32bits");
+	static_assert(sizeof(uintptr_t) == sizeof(uint32_t), "Not compiling for i386 architecture : uintptr_t is greater than 32bits");
 }
 
 void ARCH::EndlessLoop(void)
@@ -116,4 +184,41 @@ void ARCH::EndlessLoop(void)
 		__asm__ ("cli");
 		__asm__ ("hlt");
 	}
+}
+
+void ARCH::MoveToUserLand(void* linearAddress)
+{
+	// The pushed data on the stack must follows the reverse order of the pop in the iret algorithm
+	asm volatile (
+		"xchg %%bx, %%bx\n"
+		"cli\n"
+		"push %[userSS]\n"		// POP SS
+		"push %[userESP]\n"		// POP ESP
+		"push %[userEFLAGS]\n"	// POP EFLAGS
+		"push %[userCS]\n"		// POP CS
+		"push %[userEIP]\n"		// POP EIP
+		// "movw %%ax, %%ds\n"
+		"iret\n"
+		: /* outputs */
+		: [userSS] "i" (CreateSegmentSelector(6,PRIVILEGE3)), [userESP] "i" (4000), [userEFLAGS] "i" (0), [userCS] "i" (CreateSegmentSelector(4,PRIVILEGE3)), [userEIP] "m" (linearAddress), [userDS] "i" (CreateSegmentSelector(5,PRIVILEGE3)) : "ax"
+	);
+}
+
+extern "C" void PrepareProtected(void)
+{
+	// From intel doc first entry in the GDT must be 0
+	gdt[0].uival = 0;
+	//kernel code
+	gdt[1] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::EXECUTE_R,PRIVILEGE0,GRANULARITY_4K,SIZE_32b);
+	//kernel data
+	gdt[2] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE0,GRANULARITY_4K,SIZE_32b);
+	//kernel stack need to be created depending on the available memory
+	gdt[3] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE0,GRANULARITY_4K,SIZE_32b);
+
+	//user code
+	gdt[4] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::EXECUTE_RC,PRIVILEGE3,GRANULARITY_4K,SIZE_32b);
+	//user data
+	gdt[5] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE3,GRANULARITY_4K,SIZE_32b);
+	//user stack needs to be created depending on the available memory
+	gdt[6] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE3,GRANULARITY_4K,SIZE_32b);
 }
