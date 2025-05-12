@@ -190,13 +190,18 @@ void ARCH::MoveToUserLand(void* linearAddress)
 {
 	// The pushed data on the stack must follows the reverse order of the pop in the iret algorithm
 	asm volatile (
-		"xchg %%bx, %%bx\n"
 		"cli\n"
+		"xchg %%bx, %%bx\n"
 		"push %[userSS]\n"		// POP SS
 		"push %[userESP]\n"		// POP ESP
 		"push %[userEFLAGS]\n"	// POP EFLAGS
 		"push %[userCS]\n"		// POP CS
 		"push %[userEIP]\n"		// POP EIP
+		"movw %[userDS], %%ax\n"
+		"movw %%ax, %%ds\n"
+		"movw %%ax, %%es\n"
+		"movw %%ax, %%fs\n"
+		"movw %%ax, %%gs\n"
 		// "movw %%ax, %%ds\n"
 		"iret\n"
 		: /* outputs */
