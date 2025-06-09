@@ -18,7 +18,7 @@ static int parsePrintfPrecision(void) {
 	return EXIT_FAILURE;
 }
 
-static void PrintfPrintInteger10(unsigned int n)
+static int PrintfPrintInteger10(int n)
 {
 	static char decStr [] = {
 			'0','1','2','3','4','5','6','7','8','9'
@@ -26,10 +26,12 @@ static void PrintfPrintInteger10(unsigned int n)
 
 	char display[9];
 	unsigned int nDigitFree = 9;
+	int charWrittenCount = 0;
 
 	if (n < 0)
 	{
 		kputchar('-');
+		charWrittenCount += 1;
 	}
 
 	do {
@@ -40,14 +42,19 @@ static void PrintfPrintInteger10(unsigned int n)
 
 	for (size_t i = nDigitFree; i < 9; ++i){
 		kputchar(display[i]);
+		charWrittenCount += 1;
 	}
+
+	return charWrittenCount;
 }
 
-static void PrintfPrintInteger16(unsigned int n, const bool upperCase)
+static int PrintfPrintInteger16(unsigned int n, const bool upperCase)
 {
 	static char hexChar [] = {
 			'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
 	};
+
+	int charWrittenCount = 0;
 
 	hexChar[0xA] = upperCase ? 'A' : 'a';
 	hexChar[0xB] = upperCase ? 'B' : 'b';
@@ -69,52 +76,60 @@ static void PrintfPrintInteger16(unsigned int n, const bool upperCase)
 	for (size_t i = nDigitFree; i < 8; ++i)
 	{
 		kputchar(display[i]);
+		charWrittenCount += 1;
 	}
+
+	return charWrittenCount;
 }
 
-static void PrintfPrintStr(const char* str)
+static int PrintfPrintStr(const char* str)
 {
-	while(*str)
-		kputchar(*str++);
+	const char* currentStrChar = str;
+	while(*currentStrChar)
+		kputchar(*currentStrChar++);
+	
+	return currentStrChar - str;
 }
 
-static int ParsePrintfType(const char** c, va_list* args)
+static int PrintfPrintChar(const char c)
 {
-	int ret = EXIT_SUCCESS;
-	switch(**c)
+	kputchar(c);
+	return 1;
+}
+
+static int ParsePrintfType(const char* const format, va_list* args)
+{
+	int charWrittenCount = 0;
+	switch(*format)
 	{
 		case 'i':
 		case 'd':
-		{
-			const int argValue = va_arg(*args,int);
-			PrintfPrintInteger10(argValue < 0 ? -argValue : argValue);
-		} break;
+			return PrintfPrintInteger10(va_arg(*args,int));
 
 		case 'u':
-			PrintfPrintInteger10(va_arg(*args,unsigned int));
-			break;
+			return PrintfPrintInteger10(va_arg(*args,unsigned int));
 
 		case 'x':
-			PrintfPrintInteger16(va_arg(*args,unsigned int),false);
-			break;
+			return PrintfPrintInteger16(va_arg(*args,unsigned int),false);
 
 		case 'X':
-			PrintfPrintInteger16(va_arg(*args,unsigned int),true);
-			break;
+			return PrintfPrintInteger16(va_arg(*args,unsigned int),true);
 
 		case 's':
-			PrintfPrintStr(va_arg(*args,char*));
-			break;
+			return PrintfPrintStr(va_arg(*args,char*));
+		
+		case 'c':
+			return PrintfPrintChar((char)va_arg(*args,int));
 
 		default:
-			ret = EXIT_FAILURE;
 			break;
 	}
-	return ret;
+
+	return 0;
 }
 
 // Simple printf format specifier parser, only parses the type and only accept a small subset  of types
-static int ParsePrintfFormatSpecifier(const char** format, va_list* args)
+static int ParsePrintfFormatSpecifier(const char* const format, va_list* args)
 {
 	//Only parse the type declaration part of printf
 	return ParsePrintfType(format,args);
@@ -126,17 +141,20 @@ int kprintf(const char* format, ...)
 
 	va_start(args,format);
 	unsigned int charWrittenCount = 0;
-	for (const char* c = format; *c != '\0'; c += 1)
+	for (; *format != '\0'; format += 1)
 	{
-		const char currentChar = *c;
+		const char currentChar = *format;
 		if (currentChar != '%')
-		{ kputchar(currentChar); }
+		{
+			kputchar(currentChar);
+			charWrittenCount += 1;
+		}
 		else
 		{
-			c += 1;
-			if (ParsePrintfFormatSpecifier(&c,&args))
+			format += 1; //Skip the '%' as it has already been processed
+			if (*format != '\0')
 			{
-				kputchar(currentChar);
+				charWrittenCount += ParsePrintfFormatSpecifier(format,&args);
 			}
 		}
 	}
