@@ -27,7 +27,7 @@ file(MAKE_DIRECTORY ${BEETLE_SYSROOT_USR_INCLUDE})
 set(CMAKE_C_COMPILER_WORKS TRUE)
 set(CMAKE_CXX_COMPILER_WORKS TRUE)
 
-find_program(XORRISO xorriso) # Needed by grub-mkrescue
+find_program(XORRISO ${TARGET_GNU_PREFIX}xorriso) # Needed by grub-mkrescue
 find_program(GRUB_MKRESCUE grub-mkrescue REQUIRED)
 find_program(BOCHS bochs)
 find_program(NM ${TARGET_GNU_PREFIX}nm)
