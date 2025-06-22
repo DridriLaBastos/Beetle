@@ -1,23 +1,11 @@
 #include <kstdio.h>
 
 #include <beetle/arch.hpp>
+#include "beetle/boot.hpp"
 #include "beetle/multiboot.hpp"
 #include "elf/elf.h"
 
-static void executeProcessManagement(const Elf32_Ehdr* const elf)
-{
-	const bool ident_ok = (elf->e_ident[EI_MAG0] == ELFMAG0) && (elf->e_ident[EI_MAG1] == ELFMAG1) && (elf->e_ident[EI_MAG2] == ELFMAG2) && (elf->e_ident[EI_MAG3] == ELFMAG3);
-
-	if (!ident_ok) {
-		kputs("[BEETLE]: ill formed process manager elf");
-		return;
-	}
-
-	if (elf->e_ident[EI_CLASS] != ELFCLASS32) {
-		kputs("[BEETLE]: only 32 bits elf can be executed");
-		return;
-	}
-}
+#include <stddef.h>
 
 static void parseMultibootInfo(const MultibootInformation* const multibootInfo)
 {
@@ -78,6 +66,30 @@ extern "C" int kmain (const uint32_t eax, const MultibootInformation* const mult
 	 * connected drives.
 	 */
 	parseMultibootInfo(multibootInfo);
+
+	MultibootModule* modules = (MultibootModule*)multibootInfo->mods_addr;
+
+	if (multibootInfo->mods_count > 0)
+	{
+		Elf32_Ehdr* initModule = (Elf32_Ehdr*)modules[BEETLE::MULTIBOOT::BOOTIMAGE_MULTIBOOTMODULE_INDEX_INIT].mod_start;
+		kprintf("[BEETLE]: init module at 0x%X signature : 0x%X (%c) 0x%X (%c) 0x%X (%c) 0x%X\n",
+					(uintptr_t)initModule,
+					initModule->e_ident[0],initModule->e_ident[0],
+					initModule->e_ident[1],initModule->e_ident[1],
+					initModule->e_ident[2],initModule->e_ident[2],
+					initModule->e_ident[3],initModule->e_ident[3]);
+		kprintf("[BEETLE]: init module address 0x%X\n",(uintptr_t)initModule);
+		kprintf("[BEETLE]\tentry point : 0x%X\n", initModule->e_entry);
+
+		void* opcodeStartAddress = initModule->e_entry + (void*)initModule;
+		kprintf("[BEETLE]: jumping to init module at 0x%X\n",opcodeStartAddress);
+		ARCH::MoveToUserLand(opcodeStartAddress);
+	}
+	else
+	{
+		kprintf("[ERROR]: Cannot boot, no init program to run was provided");
+	}
+
 	boot_error:
 	ARCH::EndlessLoop();
 	return 0;
