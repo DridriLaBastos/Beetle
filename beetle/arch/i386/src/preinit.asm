@@ -7,7 +7,7 @@ extern kmain,gdt,idt,gdtr,idtr,PrepareProtected
 global preinit
 preinit:
 	mov edi, eax ;eax must contain a multiboot value put here by the loader. eax is saved to be passed to kmain
-	mov esi, ebx ;edx contrains the address of the multiboot info data struct. edx is saved to be passed to kmain.
+	mov esi, ebx ;ebx contrains the address of the multiboot info data struct. ebx is saved to be passed to kmain.
 
 	mov al, 0xFF ;0xFF is the value to mask the interrupts on both PICs
 	out 0x21, al ;masking interrupts on PIC 1 
