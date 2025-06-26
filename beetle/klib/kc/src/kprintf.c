@@ -99,7 +99,6 @@ static int PrintfPrintChar(const char c)
 
 static int ParsePrintfType(const char* const format, va_list* args)
 {
-	int charWrittenCount = 0;
 	switch(*format)
 	{
 		case 'i':

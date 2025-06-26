@@ -170,11 +170,37 @@ extern "C" {
 	SystemTableRegister idtr = { .limit = sizeof(idt) - 1, .linearBaseAddress = (uint32_t)(uintptr_t)idt };
 }
 
+#define COM1_BASE 0x3F8
+
+static void InitSerial()
+{
+	koutb(0x00,COM1_BASE + 1);    // Disable all interrupts
+   	koutb(0x80,COM1_BASE + 3);    // Enable DLAB (set baud rate divisor)
+   	koutb(0x01,COM1_BASE + 0);    // Set divisor to 1 (lo byte) 115200 baud
+   	koutb(0x00,COM1_BASE + 1);    //                  (hi byte)
+   	koutb(0x03,COM1_BASE + 3);    // 8 bits, no parity, one stop bit
+   	koutb(0xC7,COM1_BASE + 2);    // Enable FIFO, clear them, with 14-byte threshold
+   	koutb(0x0B,COM1_BASE + 4);    // IRQs enabled, RTS/DSR set
+   	koutb(0x1E,COM1_BASE + 4);    // Set in loopback mode, test the serial chip
+   	koutb(0xAE,COM1_BASE + 0);    // Test serial chip (send byte 0xAE and check if serial returns same byte)
+
+   // Check if serial is faulty (i.e: not same byte as sent)
+	// if(inb(PORT + 0) != 0xAE) {
+    // 	return;
+	// }
+
+   // If serial is not faulty set it in normal operation mode
+   // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
+   koutb(0x0F,COM1_BASE + 4);
+}
+
 void ARCH::Init(void* firstAvailableMemory)
 {
 	//Sanity checks
 	static_assert(sizeof(void*) == sizeof(uint32_t), "Not compiling for i386 architecture : void* is greater than 32bits");
 	static_assert(sizeof(uintptr_t) == sizeof(uint32_t), "Not compiling for i386 architecture : uintptr_t is greater than 32bits");
+
+	InitSerial();
 }
 
 void ARCH::EndlessLoop(void)

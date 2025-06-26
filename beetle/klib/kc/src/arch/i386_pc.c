@@ -11,23 +11,16 @@ static uint16_t* vgaRam = (uint16_t*)0xB8000;
 static size_t vgaBufferPosX = 0;
 static size_t vgaBufferPosY = 0;
 
-//TODO: Update cursor position by writing to a register
+static void OutputByteToCom1 (const uint8_t value)
+{
+	// Wait for the transmit buffer to be empty
+	while ((kinb(0x3F8 + 5) & 0x20) == 0);
+	koutb(value, 0x3F8);
+}
+
 void kc_putchar (const int c)
 {
-	if (c == '\n')
-		vgaBufferPosX = VGA_SCREEN_SIZE_X;
-	else if (c == '\t')
-		vgaBufferPosX += 4;
-	else
-	{
-		const uint8_t charToWrite = c;
-		const uint8_t color 		= 0b100;
-		const uint16_t valueToWrite = (color << 8) | charToWrite;
-		vgaRam[vgaBufferPosY*VGA_SCREEN_SIZE_X + vgaBufferPosX++] = valueToWrite;
-	}
-
-	vgaBufferPosY += vgaBufferPosX / VGA_SCREEN_SIZE_X;
-	vgaBufferPosX %= VGA_SCREEN_SIZE_X;
+	OutputByteToCom1(c);
 }
 
 void kc_cursor_update()
