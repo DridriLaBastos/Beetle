@@ -96,8 +96,8 @@ namespace ARCH::I386 {
 		return (d4 << 48) | (d3 << 32) | (d2 << 16) | d1;
 	}
 
-	constexpr descriptor_t CreateTSSDescriptor(const uint32_t base, const uint32_t limit, const uint8_t DPL)
-	{ return CreateSegmentDescriptor(base,limit,ARCH::I386::DESCRIPTOR::TYPE::SYSTEM_32b_TSSA,DPL,0,0); }
+	constexpr descriptor_t CreateTSSDescriptor(const uint32_t base, const uint8_t DPL)
+	{ return CreateSegmentDescriptor(base,0x67,ARCH::I386::DESCRIPTOR::TYPE::SYSTEM_32b_TSSA,DPL,0,0); }
 
 	constexpr descriptor_t CreateTaskSwitchDescriptor(const uint16_t TSSSegmentSelector, const unsigned int dpl)
 	{ return CreateSegmentDescriptor(0,TSSSegmentSelector,ARCH::I386::DESCRIPTOR::TYPE::SYSTEM_32b_TG,dpl,0,0); }

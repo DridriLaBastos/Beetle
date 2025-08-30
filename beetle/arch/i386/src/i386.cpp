@@ -1,5 +1,6 @@
 #include <stdint.h>
 
+#include <ksys/ksys.h>
 #include <beetle/arch.hpp>
 
 #include <kstring.h>
@@ -212,17 +213,20 @@ void ARCH::EndlessLoop(void)
 	}
 }
 
-void ARCH::MoveToUserLand(void* linearAddress)
+void ARCH::MoveToUserLand(void *execFileBaseAddress, void *linearAddress)
 {
-	// The pushed data on the stack must follows the reverse order of the pop in the iret algorithm
-	asm volatile (
+	gdt[4] = CreateSegmentDescriptor((uintptr_t)execFileBaseAddress, 0xFFFF, DESCRIPTOR_TYPE::EXECUTE_RC, PRIVILEGE3, GRANULARITY_4K, SIZE_32b);
+	gdt[5] = CreateSegmentDescriptor((uintptr_t)execFileBaseAddress, 0xFFFF, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE3, GRANULARITY_4K, SIZE_32b);
+	// The pushed data on the stack must follow the reverse order of the pop in the iret algorithm
+
+	asm volatile(
 		"cli\n"
 		"xchg %%bx, %%bx\n"
-		"push %[userSS]\n"		// POP SS
-		"push %[userESP]\n"		// POP ESP
-		"push %[userEFLAGS]\n"	// POP EFLAGS
-		"push %[userCS]\n"		// POP CS
-		"push %[userEIP]\n"		// POP EIP
+		"push %[userSS]\n"	   // POP SS
+		"push %[userESP]\n"	   // POP ESP
+		"push %[userEFLAGS]\n" // POP EFLAGS
+		"push %[userCS]\n"	   // POP CS
+		"push %[userEIP]\n"	   // POP EIP
 		"movw %[userDS], %%ax\n"
 		"movw %%ax, %%ds\n"
 		"movw %%ax, %%es\n"
@@ -231,25 +235,24 @@ void ARCH::MoveToUserLand(void* linearAddress)
 		// "movw %%ax, %%ds\n"
 		"iret\n"
 		: /* outputs */
-		: [userSS] "i" (CreateSegmentSelector(6,PRIVILEGE3)), [userESP] "i" (4000), [userEFLAGS] "i" (0), [userCS] "i" (CreateSegmentSelector(4,PRIVILEGE3)), [userEIP] "m" (linearAddress), [userDS] "i" (CreateSegmentSelector(5,PRIVILEGE3)) : "ax"
-	);
+		: [userSS] "irm"((uint32_t)CreateSegmentSelector(6, PRIVILEGE3)), [userESP] "i"((uint32_t)4000), [userEFLAGS] "i"((uint32_t)0), [userCS] "irm"((uint32_t)CreateSegmentSelector(4, PRIVILEGE3)), [userEIP] "m"((uint32_t)linearAddress), [userDS] "irm"(CreateSegmentSelector(5, PRIVILEGE3)) : "ax");
 }
 
 extern "C" void PrepareProtected(void)
 {
-	// From intel doc first entry in the GDT must be 0
+	// From intel doc the first entry in the GDT must be 0
 	gdt[0].uival = 0;
-	//kernel code
-	gdt[1] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::EXECUTE_R,PRIVILEGE0,GRANULARITY_4K,SIZE_32b);
-	//kernel data
-	gdt[2] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE0,GRANULARITY_4K,SIZE_32b);
-	//kernel stack need to be created depending on the available memory
-	gdt[3] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE0,GRANULARITY_4K,SIZE_32b);
+	// kernel code
+	gdt[1] = CreateSegmentDescriptor(0, 0xFFFFF, DESCRIPTOR_TYPE::EXECUTE_R, PRIVILEGE0, GRANULARITY_4K, SIZE_32b);
+	// kernel data
+	gdt[2] = CreateSegmentDescriptor(0, 0xFFFFF, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE0, GRANULARITY_4K, SIZE_32b);
+	// kernel stack need to be created depending on the available memory
+	gdt[3] = CreateSegmentDescriptor(0, 0xFFFFF, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE0, GRANULARITY_4K, SIZE_32b);
 
-	//user code
-	gdt[4] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::EXECUTE_RC,PRIVILEGE3,GRANULARITY_4K,SIZE_32b);
-	//user data
-	gdt[5] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE3,GRANULARITY_4K,SIZE_32b);
-	//user stack needs to be created depending on the available memory
-	gdt[6] = CreateSegmentDescriptor(0,0xFFFFF,DESCRIPTOR_TYPE::DATA_RW,PRIVILEGE3,GRANULARITY_4K,SIZE_32b);
+	// user code
+	gdt[4].uival = 0;
+	// user data
+	gdt[5].uival = 0;
+	// user stack needs to be created depending on the available memory
+	gdt[6] = CreateSegmentDescriptor(0, 0xFFFFF, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE3, GRANULARITY_4K, SIZE_32b);
 }

@@ -81,9 +81,9 @@ extern "C" int kmain (const uint32_t eax, const MultibootInformation* const mult
 		kprintf("[BEETLE]: init module address 0x%X\n",(uintptr_t)initModule);
 		kprintf("[BEETLE]\tentry point : 0x%X\n", initModule->e_entry);
 
-		void* opcodeStartAddress = initModule->e_entry + (void*)initModule;
+		void* opcodeStartAddress = (void*)(initModule->e_entry + (uintptr_t)initModule);
 		kprintf("[BEETLE]: jumping to init module at 0x%X\n",opcodeStartAddress);
-		ARCH::MoveToUserLand(opcodeStartAddress);
+		ARCH::MoveToUserLand(initModule,(void*)initModule->e_entry);
 	}
 	else
 	{
