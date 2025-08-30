@@ -5,7 +5,6 @@
 		"preinit",
 		"tdescriptor"
 	],
-
 	"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
 	"cmake.configureArgs": [
 		"-DCMAKE_TOOLCHAIN_FILE=${workspaceFolder}/toolchain.cmake",
@@ -13,6 +12,11 @@
 		"-DBEETLE_PLATFORM=pc"
 	],
 	"files.associations": {
-		"stdint-gcc.h": "c"
-	}
+		"stdint-gcc.h": "c",
+		"stdio.h": "c",
+		"kstdio.h": "c",
+		"stdarg.h": "c",
+		"stdbool.h": "c"
+	},
+	"editor.formatOnSave": false
 }
