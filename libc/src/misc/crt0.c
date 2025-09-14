@@ -10,9 +10,10 @@ extern void _fini(void);
 // https://wiki.osdev.org/Calling_Global_Constructors#Using_crti.o.2C_crtbegin.o.2C_crtend.o.2C_and_crtn.o_in_User-Space
 // https://wiki.osdev.org/Creating_a_C_Library
 
+//TODO: Why when I follow the tutorials mentioned in the above comment, I still have an undefined reference to the _init function ?
 int _start(int argc, const char** argv){
-	_init();
+	// _init();
 	const int ret = main(argc,argv);
-	_fini();
+	// _fini();
 	return ret;
 }

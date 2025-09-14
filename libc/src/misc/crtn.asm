@@ -1,7 +1,7 @@
-section init
+section .init
 pop ebp
 ret
 
-section fini
+section .fini
 pop ebp
 ret
