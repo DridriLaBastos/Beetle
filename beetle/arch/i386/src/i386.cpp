@@ -204,6 +204,21 @@ void ARCH::Init(void* firstAvailableMemory)
 	InitSerial();
 }
 
+void ARCH::Isolate()
+{
+	__asm__ ("cli");
+}
+
+void ARCH::Connect()
+{
+	__asm__ ("sti");
+}
+
+void ARCH::RegisterInterrupt(const unsigned int vector, void(*handler)(void))
+{
+	//TODO: Register the interrupt
+}
+
 void ARCH::EndlessLoop(void)
 {
 	while (true)

@@ -11,6 +11,29 @@ namespace ARCH
 	void Init(void *firstAvailableMemory);
 	void EndlessLoop(void);
 	void MoveToUserLand(void *execFileBaseAddress, void *linearAddress);
+
+	/**
+	 * @brief Isolate the kernel during the early initialization stage so that it is not interrupted during its configuration
+	 * 
+	 */
+	void Isolate(void);
+
+	/**
+	 * @brief Reconnect the kernel to the arch.
+	 * 
+	 * This function is called after the kernel initialized it self to be able to handle the arch events.
+	 * This function do the opposite of @ref ARCH::Isolate()
+	 * 
+	 */
+	void Connect(void);
+
+	/**
+	 * @brief Register a handle for the provided vector
+	 * 
+	 * @param vector ISR number
+	 * @param handler handler addr to be called
+	 */
+	void RegisterInterrupt(const unsigned int vector, void(*handler)(void));
 }
 
 #endif

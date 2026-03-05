@@ -1,6 +1,8 @@
 #include <kstdio.h>
 
-#include <beetle/arch.hpp>
+#include "beetle/arch.hpp"
+#include "beetle/const.hpp"
+
 #include "beetle/boot.hpp"
 #include "beetle/multiboot.hpp"
 #include "elf/elf.h"
@@ -48,8 +50,13 @@ static void parseMultibootInfo(const MultibootInformation* const multibootInfo)
 	}
 }
 
+static void MakeSyscall(void) {
+
+}
+
 extern "C" int kmain (const uint32_t eax, const MultibootInformation* const multibootInfo)
 {
+#if 0
 	if (eax != 0x2BADB002)
 		return -1;
 
@@ -93,4 +100,13 @@ extern "C" int kmain (const uint32_t eax, const MultibootInformation* const mult
 	boot_error:
 	ARCH::EndlessLoop();
 	return 0;
+#else
+
+	ARCH::Isolate();
+	ARCH::Init((void*)multibootInfo->mem_upper);
+	ARCH::RegisterInterrupt(BEETLE::CONST::SYSCALL_VECTOR,MakeSyscall);
+	ARCH::Connect();
+
+	ARCH::EndlessLoop();
+#endif
 }
