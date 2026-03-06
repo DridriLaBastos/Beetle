@@ -50,8 +50,12 @@ static void parseMultibootInfo(const MultibootInformation* const multibootInfo)
 	}
 }
 
-static void MakeSyscall(void) {
+// Parameters will be passed by registers
+__attribute__((naked))
+static void SyscallHandler(void) {
 
+	//TODO: How to make this function architecture independent ?
+	__asm__ volatile ("retf");
 }
 
 extern "C" int kmain (const uint32_t eax, const MultibootInformation* const multibootInfo)
@@ -104,7 +108,9 @@ extern "C" int kmain (const uint32_t eax, const MultibootInformation* const mult
 
 	ARCH::Isolate();
 	ARCH::Init((void*)multibootInfo->mem_upper);
-	ARCH::RegisterInterrupt(BEETLE::CONST::SYSCALL_VECTOR,MakeSyscall);
+	ARCH::RegisterInterrupt(BEETLE::SYSCALL_VECTOR,SyscallHandler);
+	ARCH::TrapSyscall(BEETLE::ESysCallFn::SEND);
+	ARCH::TrapSyscall(BEETLE::ESysCallFn::RECV);
 	ARCH::Connect();
 
 	ARCH::EndlessLoop();

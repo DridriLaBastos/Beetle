@@ -1,6 +1,16 @@
 #ifndef __ARCH_SERVICES__
 #define __ARCH_SERVICES__
 
+#include "beetle/const.hpp"
+
+/**
+ * @file arch.hpp
+ * 
+ * This file contains the definitions of the functions the kernel requires the arch layer to implement
+ * and the documentation of what they must do.
+ * 
+ */
+
 namespace ARCH
 {
 	/**
@@ -34,6 +44,14 @@ namespace ARCH
 	 * @param handler handler addr to be called
 	 */
 	void RegisterInterrupt(const unsigned int vector, void(*handler)(void));
+
+	/**
+	 * @brief Let the architecture layer populate the CPU and make a trap call into the kernel code to execute the syscall
+	 * 
+	 */
+	//TODO: Reflexion: It might be possible to template this so that the int parameter can be use as an immediate
+	// int value 
+	void TrapSyscall(const BEETLE::ESysCallFn syscallfn);
 }
 
 #endif

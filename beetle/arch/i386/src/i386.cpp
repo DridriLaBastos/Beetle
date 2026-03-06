@@ -214,9 +214,32 @@ void ARCH::Connect()
 	__asm__ ("sti");
 }
 
+static void (*static_handler)(void) = nullptr;
+
 void ARCH::RegisterInterrupt(const unsigned int vector, void(*handler)(void))
 {
 	//TODO: Register the interrupt
+	static_handler = handler;
+}
+
+void ARCH::TrapSyscall(const BEETLE::ESysCallFn syscallfn)
+{
+	struct {          /* selector:offset layout */
+		uint32_t off;        /* the value stored in static_handler */
+    	uint16_t sel;        /* 0x8 in your case */
+} __attribute__((packed)) fp = {
+		.off = (uint32_t)static_handler,
+        .sel = CreateSegmentSelector(1,0),
+    };
+
+	__asm__ volatile (
+		"xchg %%bx,%%bx\n\t"
+		"movl %0, %%eax\n\t"
+		"lcall *%1\n\t"
+		: /* outputs */
+		: /* inputs*/ "X" (static_cast<unsigned int>(syscallfn)), "m" (fp)
+		: /* clobbers */ "eax", "memory"
+	);
 }
 
 void ARCH::EndlessLoop(void)
