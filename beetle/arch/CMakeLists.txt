@@ -3,3 +3,6 @@ if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${BEETLE_TARGET})
 endif()
 
 add_subdirectory(${BEETLE_TARGET})
+
+add_library(arch STATIC $<TARGET_OBJECTS:${BEETLE_TARGET}>)
+target_include_directories(arch INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)

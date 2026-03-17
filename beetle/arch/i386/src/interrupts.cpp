@@ -1,6 +1,10 @@
 #include <stdint.h>
 #include <ksys/ksys.h>
 
+#include <beetle/arch.hpp>
+
+#include "i386.hpp"
+
 #define PIC_EOI 0x20
 #define MASTER_PIC_PORT 0x20
 #define SLAVE_PIC_PORT  0xA0
@@ -28,7 +32,7 @@ void ARCH::I386::interruptMC  (const void* ptr) { asm("xchg %bx, %bx"); }
 void ARCH::I386::interruptXM  (const void* ptr) { asm("xchg %bx, %bx"); }
 void ARCH::I386::interruptVE  (const void* ptr) { asm("xchg %bx, %bx"); }
 
-void ARCH::I386::irq0 (const void* ptr) { koutb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq0 (const void* ptr) { __asm__("xchg %bx, %bx"); BEETLE::API::Schedule(); koutb(PIC_EOI,MASTER_PIC_PORT); }
 void ARCH::I386::irq1 (const void* ptr) { koutb(PIC_EOI,MASTER_PIC_PORT); }
 void ARCH::I386::irq2 (const void* ptr) { koutb(PIC_EOI,MASTER_PIC_PORT); }
 void ARCH::I386::irq3 (const void* ptr) { koutb(PIC_EOI,MASTER_PIC_PORT); }

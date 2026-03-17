@@ -14,9 +14,12 @@ preinit:
 	out 0xA1, al ;masking interrupts in PIC 2
 	cli ;disabling nmi while switching to protected mode
 
+	push kernel_stack.end - kernel_stack
+	push kernel_stack
 	call PrepareProtected
 
 	lgdt [gdtr] ;Loading the gdtr structure created in arch.cpp
+	lidt [idtr] ;Loading the idtr structure created in arch.cpp
 
 	; passing into protected mode
 	mov eax, cr0
@@ -40,11 +43,11 @@ preinit:
 	;Loading privilege 0 stack segment
 	mov ax, 0x18
 	mov ss, ax
-	mov esp, 0x80000
+	mov esp, kernel_stack.end - kernel_stack
 
 	;Setting the stack frame for kmain
 	; first args = saved value of eax
-	; second rgs = savec value of ebx
+	; second args = saved value of ebx
 	push esi
 	push edi
 	call kmain
@@ -55,3 +58,9 @@ preinit:
 		hlt
 		jmp .loop
 
+section .bss
+; Kernel stack : saving 1024 uint32_T entries.
+; The work of making the memory of this region available in the segment descriptor used by
+kernel_stack:
+resd 1024 
+.end:

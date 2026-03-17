@@ -17,12 +17,12 @@ add_subdirectory(arch)
 
 set(BEETLE_PROJECT_NAME_REVISION "${PROJECT_NAME}.${PROJECT_VERSION}" PARENT_SCOPE)
 
-file(GLOB CXX_SOURCES CONFIGURE_DEPENDS "*.cpp" "src/*.cpp")
+file(GLOB CXX_SOURCES CONFIGURE_DEPENDS "*.cpp" "src/*.cpp" "src/api/*.cpp")
 file(GLOB ASM_SOURCES CONFIGURE_DEPENDS "*.asm")
 
-add_executable(beetle ${CXX_SOURCES} ${ASM_SOURCES} $<TARGET_OBJECTS:${BEETLE_TARGET}>)
+add_executable(beetle ${CXX_SOURCES} ${ASM_SOURCES})
 
-target_link_libraries(beetle PRIVATE kc ${BEETLE_ARCH})
+target_link_libraries(beetle PRIVATE kc arch)
 
 target_link_options(beetle
 					PRIVATE -Wl,--script=${PROJECT_SOURCE_DIR}/${BEETLE_TARGET}_${BEETLE_PLATFORM}_linker.ld

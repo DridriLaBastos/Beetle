@@ -4,6 +4,7 @@
 #include "beetle/const.hpp"
 
 #include "beetle/boot.hpp"
+#include "beetle/process.hpp"
 #include "beetle/multiboot.hpp"
 #include "elf/elf.h"
 
@@ -58,7 +59,7 @@ static void SyscallHandler(void) {
 	__asm__ volatile ("retf");
 }
 
-extern "C" int kmain (const uint32_t eax, const MultibootInformation* const multibootInfo)
+extern "C" void kmain (const uint32_t eax, const MultibootInformation* const multibootInfo)
 {
 #if 0
 	if (eax != 0x2BADB002)
@@ -108,9 +109,6 @@ extern "C" int kmain (const uint32_t eax, const MultibootInformation* const mult
 
 	ARCH::Isolate();
 	ARCH::Init((void*)multibootInfo->mem_upper);
-	ARCH::RegisterInterrupt(BEETLE::SYSCALL_VECTOR,SyscallHandler);
-	ARCH::TrapSyscall(BEETLE::ESysCallFn::SEND);
-	ARCH::TrapSyscall(BEETLE::ESysCallFn::RECV);
 	ARCH::Connect();
 
 	ARCH::EndlessLoop();

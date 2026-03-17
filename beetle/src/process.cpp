@@ -3,10 +3,10 @@
 
 void BEETLE::Send(const ServiceAddress dest, const Message m)
 {
-    ARCH::TrapSyscall(BEETLE::ESysCallFn::SEND);
+    ARCH::MakeSyscall(BEETLE::ESysCallFn::SEND);
 }
 
 BEETLE::Message BEETLE::Receive(const ServiceAddress src)
 {
-    ARCH::TrapSyscall(BEETLE::ESysCallFn::RECV);
+    ARCH::MakeSyscall(BEETLE::ESysCallFn::RECV);
 }

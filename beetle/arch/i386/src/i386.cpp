@@ -5,6 +5,10 @@
 
 #include <kstring.h>
 
+#include "i386.hpp"
+
+#define DBG() __asm__ volatile ("xchg %bx, %bx")
+
 static constexpr unsigned int PRIVILEGE0 = 0;
 static constexpr unsigned int PRIVILEGE1 = 1;
 static constexpr unsigned int PRIVILEGE2 = 2;
@@ -140,10 +144,45 @@ static constexpr USegmentDescriptor CreateSegmentDescriptor(const uint32_t base,
 	return descriptor;
 }
 
-static constexpr USegmentDescriptor CreateTSSDescriptor(const uint32_t base)
+union UGateDescriptor {
+	descriptor_t uival;
+
+	struct {
+		descriptor_t
+			offset15_0: 16,
+			ss: 16,
+			:8,
+			type: 5,
+			dpl: 2,
+			p: 1,
+			offset31_16: 16;
+	} fields;
+};
+
+union UTaskGateOffsetFields
 {
-	// From intel doc : 'when G flag is 0, the limit must 0x67 : one less than the minimum size of a TSS'
-	return CreateSegmentDescriptor(base,0x67,DESCRIPTOR_TYPE::SYSTEM_32b_TSSA,PRIVILEGE0,0,SIZE_32b);
+	uint32_t uival;
+
+	struct {
+			uint16_t offset15_0;
+			uint16_t offset31_16;
+	} fields;
+};
+
+static constexpr UGateDescriptor CreateGateDescriptor (const uint32_t offset, segment_selector_t ss, const DESCRIPTOR_TYPE type, const unsigned int dpl)
+{	
+	const UTaskGateOffsetFields offsetField { .uival=offset };
+	const UGateDescriptor desc = UGateDescriptor{
+		.fields = {
+			.offset15_0 = offsetField.fields.offset15_0,
+			.ss = 8,
+			.type = (int)DESCRIPTOR_TYPE::SYSTEM_32b_IG,
+			.p = 1,
+			.offset31_16 = offsetField.fields.offset31_16
+		}
+	};
+
+	return desc;
 }
 
 union SegmentSelector {
@@ -202,42 +241,113 @@ void ARCH::Init(void* firstAvailableMemory)
 	static_assert(sizeof(uintptr_t) == sizeof(uint32_t), "Not compiling for i386 architecture : uintptr_t is greater than 32bits");
 
 	InitSerial();
+
+	// IRQ from the master interrupt controller are wired into 0x20 to 0x28
+
+	// IRQ from the slave interrupt controller are wired into 0x30 to 0x38
+
+	// Beetle syscall will be wired into 0xBE
 }
 
 void ARCH::Isolate()
 {
+	// Clear interrupt flags ans stop receiving them
 	__asm__ ("cli");
+
+	// Isolate both IRQs controller
+	__asm__ volatile (
+		"mov $0xFF, %%al\n"
+		"out %%al, $0x21\n"
+		"out %%al, $0xA1\n"
+		:::"al"
+	);
+}
+
+static constexpr uint8_t MakeICW1 (const bool icw4Needed, const bool singleMode)
+{
+	return 0x10 | (((int)singleMode) << 1) | (((int)icw4Needed) << 0);
+}
+
+static constexpr uint8_t MakeICW4 (const bool autoEoi, const bool isMaster)
+{
+	return 0b00001001 | (((int)isMaster) << 2) | (((int)autoEoi) << 1);
 }
 
 void ARCH::Connect()
 {
+	// Reseting interrupt controllers
+	__asm__ volatile 
+	(
+		/* Putting both PIC in the init sequence */
+
+		"mov %0, %%al\n" 	// Preparing ICW1 PIC1 into al
+		"out %%al, $0x20\n"	// out ICW1 PIC1
+		"mov %1, %%al\n"	// Preparing ICW1 PIC2 into al
+		"out %%al, $0xA0\n"	// out ICW1 PIC2
+		
+		/* Performing initialization steps */
+		/** Sending ICW2 **/
+
+		"mov $0x20, %%al\n" // Preparing ICW2 PIC1 : irqs from master PIC starting at 0x20
+		"out %%al, $0x21\n" // out ICW2 PIC1
+		"mov $0x30, %%al\n"	// Preparing ICW2 PIC2 : irqs from slave PIC statring at 0x30s
+		"out %%al, $0xA1\n"	// out ICW2 PIC2
+
+		/** Sending ICW3 **/
+		"mov $0b100, %%al\n"// Preparing Master ICW3 : slave irqs on pin 2
+		"out %%al, $0x21\n"	// out ICW3 PIC1
+		"mov $2, %%al\n"	// Preparing slave ICW3 : ID 2 -> slave connected on master pin 2
+		"out %%al, $0xA1\n"	// out ICW3 PIC2
+
+		/** Sending ICW4 **/
+		"mov %2, %%al\n" 	// Preparing ICW4 PIC1 into al
+		"out %%al, $0x21\n"	// out ICW1 PIC1
+		"mov %3, %%al\n"	// Preparing ICW4 PIC2 into al
+		"out %%al, $0xA1\n"	// out ICW1 PIC2
+
+		/* End of initialization steps -> unmasking the PIC */
+		// End of initialization from the OS side : strictly speaking, the PICs are fully initialized
+		// after receiving the ICW4 command word
+		"mov $0, %%al\n"
+		"out %%al, $0x21\n"
+		"out %%al, $0xA1\n"
+
+		: /*outputs*/
+
+		: /*inputs*/ "i" (MakeICW1(true,false)), "i" (MakeICW1(true,false)), "i" (MakeICW4(false,true)), "i" (MakeICW4(false,false))
+		: /*clobbers*/ "eax"
+
+	);
+
+	// Enabling interrupts handling
 	__asm__ ("sti");
 }
 
-static void (*static_handler)(void) = nullptr;
-
-void ARCH::RegisterInterrupt(const unsigned int vector, void(*handler)(void))
+// c linkage needed because the function si called from asm block
+__attribute__((naked))
+static void SyscallPrepare(void)
 {
-	//TODO: Register the interrupt
-	static_handler = handler;
+	//TODO: With optimizations enabled can the compiler detects that the
+	// the argument is already in the register and thus not push it ?
+	register BEETLE::ESysCallFn syscallFn;
+	__asm__ volatile ("movl %%eax, %0\n"
+	: /*outputs*/
+	: /*inputs*/ "X" (syscallFn));
+	BEETLE::API::Syscall(syscallFn);
+	__asm__ volatile ("retf");
 }
 
-void ARCH::TrapSyscall(const BEETLE::ESysCallFn syscallfn)
+void ARCH::MakeSyscall(const BEETLE::ESysCallFn syscallFn)
 {
-	struct {          /* selector:offset layout */
-		uint32_t off;        /* the value stored in static_handler */
-    	uint16_t sel;        /* 0x8 in your case */
-} __attribute__((packed)) fp = {
-		.off = (uint32_t)static_handler,
-        .sel = CreateSegmentSelector(1,0),
-    };
-
+	struct {
+		uint32_t offset;
+		uint16_t segment;
+	} __attribute__((packed)) longCallPtr { .offset = (uint32_t)(uintptr_t)SyscallPrepare, .segment = 0x8 };
 	__asm__ volatile (
-		"xchg %%bx,%%bx\n\t"
 		"movl %0, %%eax\n\t"
 		"lcall *%1\n\t"
 		: /* outputs */
-		: /* inputs*/ "X" (static_cast<unsigned int>(syscallfn)), "m" (fp)
+		: /* inputs*/ "X" (static_cast<unsigned int>(syscallFn)), "X" (longCallPtr)
 		: /* clobbers */ "eax", "memory"
 	);
 }
@@ -246,7 +356,6 @@ void ARCH::EndlessLoop(void)
 {
 	while (true)
 	{
-		__asm__ ("cli");
 		__asm__ ("hlt");
 	}
 }
@@ -259,7 +368,6 @@ void ARCH::MoveToUserLand(void *execFileBaseAddress, void *linearAddress)
 
 	asm volatile(
 		"cli\n"
-		"xchg %%bx, %%bx\n"
 		"push %[userSS]\n"	   // POP SS
 		"push %[userESP]\n"	   // POP ESP
 		"push %[userEFLAGS]\n" // POP EFLAGS
@@ -276,7 +384,7 @@ void ARCH::MoveToUserLand(void *execFileBaseAddress, void *linearAddress)
 		: [userSS] "irm"((uint32_t)CreateSegmentSelector(6, PRIVILEGE3)), [userESP] "i"((uint32_t)4000), [userEFLAGS] "i"((uint32_t)0), [userCS] "irm"((uint32_t)CreateSegmentSelector(4, PRIVILEGE3)), [userEIP] "m"((uint32_t)linearAddress), [userDS] "irm"(CreateSegmentSelector(5, PRIVILEGE3)) : "ax");
 }
 
-extern "C" void PrepareProtected(void)
+extern "C" void PrepareProtected(const uintptr_t stackstart, const unsigned int stackBytes)
 {
 	// From intel doc the first entry in the GDT must be 0
 	gdt[0].uival = 0;
@@ -285,7 +393,7 @@ extern "C" void PrepareProtected(void)
 	// kernel data
 	gdt[2] = CreateSegmentDescriptor(0, 0xFFFFF, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE0, GRANULARITY_4K, SIZE_32b);
 	// kernel stack need to be created depending on the available memory
-	gdt[3] = CreateSegmentDescriptor(0, 0xFFFFF, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE0, GRANULARITY_4K, SIZE_32b);
+	gdt[3] = CreateSegmentDescriptor(stackstart, stackBytes, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE0, GRANULARITY_BYTES, SIZE_32b);
 
 	// user code
 	gdt[4].uival = 0;
@@ -293,4 +401,8 @@ extern "C" void PrepareProtected(void)
 	gdt[5].uival = 0;
 	// user stack needs to be created depending on the available memory
 	gdt[6] = CreateSegmentDescriptor(0, 0xFFFFF, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE3, GRANULARITY_4K, SIZE_32b);
+
+
+	// idt[0x08] = CreateGateDescriptor((uint32_t)(uintptr_t)ARCH::I386::interruptDF,CreateSegmentSelector(1,0),DESCRIPTOR_TYPE::SYSTEM_32b_IG,0).uival;
+	idt[0x20] = CreateGateDescriptor((uint32_t)(uintptr_t)ARCH::I386::irq0,CreateSegmentSelector(1,0),DESCRIPTOR_TYPE::SYSTEM_32b_IG,0).uival;
 }
