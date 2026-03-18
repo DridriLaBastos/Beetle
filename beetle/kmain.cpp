@@ -1,5 +1,3 @@
-#include <kstdio.h>
-
 #include "beetle/arch.hpp"
 #include "beetle/const.hpp"
 
@@ -12,6 +10,7 @@
 
 static void parseMultibootInfo(const MultibootInformation* const multibootInfo)
 {
+#if 0
 	kputs("[BEETLE]: scanning boot environment");
 	const uint32_t multibootFlags = multibootInfo->flags;
 
@@ -49,6 +48,7 @@ static void parseMultibootInfo(const MultibootInformation* const multibootInfo)
 	if (multibootFlags & (1 << 5)) {
 		kprintf("[BEETLE]: kernel executable loaded at address 0x%X\n",multibootInfo->addr);
 	}
+#endif
 }
 
 // Parameters will be passed by registers
@@ -109,6 +109,10 @@ extern "C" void kmain (const uint32_t eax, const MultibootInformation* const mul
 
 	ARCH::Isolate();
 	ARCH::Init((void*)multibootInfo->mem_upper);
+
+	// At this point all the necessary components of the architecture layer has been initialized and the kernel
+	// consider the hardware safe to use. It will now load the necessary boot image to start the ball rolling
+
 	ARCH::Connect();
 
 	ARCH::EndlessLoop();

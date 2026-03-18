@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include <ksys/ksys.h>
 
 #include <beetle/arch.hpp>
 
@@ -32,16 +31,16 @@ void ARCH::I386::interruptMC  (const void* ptr) { asm("xchg %bx, %bx"); }
 void ARCH::I386::interruptXM  (const void* ptr) { asm("xchg %bx, %bx"); }
 void ARCH::I386::interruptVE  (const void* ptr) { asm("xchg %bx, %bx"); }
 
-void ARCH::I386::irq0 (const void* ptr) { __asm__("xchg %bx, %bx"); BEETLE::API::Schedule(); koutb(PIC_EOI,MASTER_PIC_PORT); }
-void ARCH::I386::irq1 (const void* ptr) { koutb(PIC_EOI,MASTER_PIC_PORT); }
-void ARCH::I386::irq2 (const void* ptr) { koutb(PIC_EOI,MASTER_PIC_PORT); }
-void ARCH::I386::irq3 (const void* ptr) { koutb(PIC_EOI,MASTER_PIC_PORT); }
-void ARCH::I386::irq4 (const void* ptr) { koutb(PIC_EOI,MASTER_PIC_PORT); }
-void ARCH::I386::irq5 (const void* ptr) { koutb(PIC_EOI,MASTER_PIC_PORT); }
-void ARCH::I386::irq6 (const void* ptr) { koutb(PIC_EOI,MASTER_PIC_PORT); }
-void ARCH::I386::irq7 (const void* ptr) { koutb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq0 (const void* ptr) { __asm__("xchg %bx, %bx"); BEETLE::API::Schedule(); outb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq1 (const void* ptr) { outb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq2 (const void* ptr) { outb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq3 (const void* ptr) { outb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq4 (const void* ptr) { outb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq5 (const void* ptr) { outb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq6 (const void* ptr) { outb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq7 (const void* ptr) { outb(PIC_EOI,MASTER_PIC_PORT); }
 
-void ARCH::I386::irq8 (const void* ptr) { CMOSRealTimeClockCount += 1; koutb(PIC_EOI, SLAVE_PIC_PORT); koutb(PIC_EOI,MASTER_PIC_PORT); }
-void ARCH::I386::irq9 (const void* ptr) { koutb(PIC_EOI, SLAVE_PIC_PORT); koutb(PIC_EOI,MASTER_PIC_PORT); }
-void ARCH::I386::irq13 (const void* ptr) { koutb(PIC_EOI, SLAVE_PIC_PORT); koutb(PIC_EOI,MASTER_PIC_PORT); }
-void ARCH::I386::irq14 (const void* ptr) { koutb(PIC_EOI, SLAVE_PIC_PORT); koutb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq8 (const void* ptr) { CMOSRealTimeClockCount += 1; outb(PIC_EOI, SLAVE_PIC_PORT); outb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq9 (const void* ptr) { outb(PIC_EOI, SLAVE_PIC_PORT); outb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq13 (const void* ptr) { outb(PIC_EOI, SLAVE_PIC_PORT); outb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq14 (const void* ptr) { outb(PIC_EOI, SLAVE_PIC_PORT); outb(PIC_EOI,MASTER_PIC_PORT); }

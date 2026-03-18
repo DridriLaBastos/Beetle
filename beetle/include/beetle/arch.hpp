@@ -52,9 +52,8 @@ namespace ARCH
 	 * This function might be called in the early initialization stage. When no FS driver have been loaded and
 	 * there is no stdin, stdout and stderr, this function will be called as a debug tool. The arch layer is required
 	 * to implemented this function. Usually it will output data in polled mode to a serial port to be defined by
-	 * the arch layer but the kernel does not force anything. It is an early stage bypass the output destination
-	 * is implementation dependant of the architecture.
-	 * 
+	 * the arch layer but the kernel does not force anything. It is an early stage bypass, the output destination
+	 * is at the discretion of the architecture implementation.
 	 */
 	int DebugOutput(const char* fmt, ...) __attribute__((format(printf,1,2)));
 
@@ -77,18 +76,18 @@ namespace ARCH
 	void MakeSyscall (const BEETLE::ESysCallFn syscallFn);
 }
 
+/**
+ * In this namespace the function definition for Beetle API is provided. By having the function definition here
+ * the architecture layer can use the symbols instead of having to rely on a function pointers. If it add a bit
+ * of decoupling since now the kernel is not fully responsible of giving function to the architecture side, it
+ * permits to use function call instead of pointer to function call in the architecture layer. Since everything
+ * is statically linked in the final executable it will permit inlining this function call and improving
+ * performances.
+ * 
+ * The kernel is responsible for the implementation of those functions
+ */
 namespace BEETLE::API
 {
-	/**
-	 * In this namespace the function definition for Beetle API is provided. By having the function definition here
-	 * the architecture layer can use the symbols instead of having to rely on a function pointers. If it add a bit
-	 * of decoupling since now the kernel is not fully responsible of giving function to the architecture side, it
-	 * permits to use function call instead of pointer to function call in the architecture layer. Since everything
-	 * is statically linked in the final executable it will permit inlining this function call and improving
-	 * performances.
-	 * 
-	 * The kernel is responsible for the implementation of those functions
-	 */
 	void Schedule (void);
 
 	void Syscall (const BEETLE::ESysCallFn syscallfn);
