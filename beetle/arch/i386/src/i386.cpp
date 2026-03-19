@@ -209,26 +209,40 @@ extern "C" {
 
 #define COM1_BASE 0x3F8
 
+// See https://wiki.osdev.org/Serial_Ports#Programming_the_Serial_Communications_Port
 static void InitSerial()
 {
-// 	koutb(0x00,COM1_BASE + 1);    // Disable all interrupts
-//    	koutb(0x80,COM1_BASE + 3);    // Enable DLAB (set baud rate divisor)
-//    	koutb(0x01,COM1_BASE + 0);    // Set divisor to 1 (lo byte) 115200 baud
-//    	koutb(0x00,COM1_BASE + 1);    //                  (hi byte)
-//    	koutb(0x03,COM1_BASE + 3);    // 8 bits, no parity, one stop bit
-//    	koutb(0xC7,COM1_BASE + 2);    // Enable FIFO, clear them, with 14-byte threshold
-//    	koutb(0x0B,COM1_BASE + 4);    // IRQs enabled, RTS/DSR set
-//    	koutb(0x1E,COM1_BASE + 4);    // Set in loopback mode, test the serial chip
-//    	koutb(0xAE,COM1_BASE + 0);    // Test serial chip (send byte 0xAE and check if serial returns same byte)
+	ARCH::I386::outb(0x00,COM1_BASE + 1); 	// Disable all interrupts
+   	ARCH::I386::outb(0x80,COM1_BASE + 3);	// Enable DLAB (set baud rate divisor)
+   	ARCH::I386::outb(0x01,COM1_BASE + 0);	// Set divisor to 1 (lo byte) 115200 baud
+   	ARCH::I386::outb(0x00,COM1_BASE + 1);	//                  (hi byte)
+   	ARCH::I386::outb(0x03,COM1_BASE + 3);	// 8 bits, no parity, one stop bit, DLAB off
+	ARCH::I386::outb(0b11000111,COM1_BASE + 2);	// Enable FIFO, clear them, with 14-byte threshold
+	ARCH::I386::outb(0b00010011,COM1_BASE + 4); // IRQs disabled, RTS/DSR set
+												// loopback to test the configurations
+	ARCH::I386::outb(0xAE,COM1_BASE + 0); // Test serial chip (send byte 0xAE and check if serial returns same byte)
 
-//    // Check if serial is faulty (i.e: not same byte as sent)
-// 	// if(inb(PORT + 0) != 0xAE) {
-//     // 	return;
-// 	// }
+   	ARCH::I386::outb(0x1E,COM1_BASE + 4);    // Set in loopback mode, test the serial chip
 
-//    // If serial is not faulty set it in normal operation mode
-//    // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
-//    koutb(0x0F,COM1_BASE + 4);
+	uint8_t status;
+
+	do 
+	{
+		status = ARCH::I386::inb(COM1_BASE + 5);
+	} while (!(ARCH::I386::inb(COM1_BASE+5) & 0b11111));
+
+	if (status & 0b1) {
+		// If data can be read and the sent data has been received, the loop back mode is disabled
+		const uint8_t data = ARCH::I386::inb(COM1_BASE + 0);
+
+		if (data == 0xAE) {
+			ARCH::I386::outb(0b00000111,COM1_BASE + 4);
+		} else {
+			__asm__ volatile ("xchg %bx, %bx\nxchg %ax, %ax");
+		}
+	} else {
+		__asm__ volatile ("xchg %bx, %bx\n xchg %cx,%cx");
+	}
 }
 
 void ARCH::Init(void* firstAvailableMemory)
@@ -310,7 +324,6 @@ void ARCH::Connect()
 		"out %%al, $0xA1\n"
 
 		: /*outputs*/
-
 		: /*inputs*/ "i" (MakeICW1(true,false)), "i" (MakeICW1(true,false)), "i" (MakeICW4(false,true)), "i" (MakeICW4(false,false))
 		: /*clobbers*/ "eax"
 
@@ -402,4 +415,18 @@ extern "C" void PrepareProtected(const uintptr_t stackstart, const unsigned int 
 
 	// idt[0x08] = CreateGateDescriptor((uint32_t)(uintptr_t)ARCH::I386::interruptDF,CreateSegmentSelector(1,0),DESCRIPTOR_TYPE::SYSTEM_32b_IG,0).uival;
 	idt[0x20] = CreateGateDescriptor((uint32_t)(uintptr_t)ARCH::I386::irq0,CreateSegmentSelector(1,0),DESCRIPTOR_TYPE::SYSTEM_32b_IG,0).uival;
+}
+
+int ARCH::DebugOutput(const char* fmt, ...)
+{
+	for (char c = *fmt; c = *fmt; c = *(++fmt))
+	{
+		uint8_t status;
+
+		do {
+			status = ARCH::I386::inb(COM1_BASE+5);
+		} while (!(status & 0b100000));
+		ARCH::I386::outb(c,COM1_BASE);
+	}
+	return 1;
 }

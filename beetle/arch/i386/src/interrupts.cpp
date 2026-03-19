@@ -31,7 +31,7 @@ void ARCH::I386::interruptMC  (const void* ptr) { asm("xchg %bx, %bx"); }
 void ARCH::I386::interruptXM  (const void* ptr) { asm("xchg %bx, %bx"); }
 void ARCH::I386::interruptVE  (const void* ptr) { asm("xchg %bx, %bx"); }
 
-void ARCH::I386::irq0 (const void* ptr) { __asm__("xchg %bx, %bx"); BEETLE::API::Schedule(); outb(PIC_EOI,MASTER_PIC_PORT); }
+void ARCH::I386::irq0 (const void* ptr) { BEETLE::API::Schedule(); outb(PIC_EOI,MASTER_PIC_PORT); }
 void ARCH::I386::irq1 (const void* ptr) { outb(PIC_EOI,MASTER_PIC_PORT); }
 void ARCH::I386::irq2 (const void* ptr) { outb(PIC_EOI,MASTER_PIC_PORT); }
 void ARCH::I386::irq3 (const void* ptr) { outb(PIC_EOI,MASTER_PIC_PORT); }

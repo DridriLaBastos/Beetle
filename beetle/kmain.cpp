@@ -109,6 +109,7 @@ extern "C" void kmain (const uint32_t eax, const MultibootInformation* const mul
 
 	ARCH::Isolate();
 	ARCH::Init((void*)multibootInfo->mem_upper);
+	ARCH::DebugOutput("*** REACHED ***\n");
 
 	// At this point all the necessary components of the architecture layer has been initialized and the kernel
 	// consider the hardware safe to use. It will now load the necessary boot image to start the ball rolling
