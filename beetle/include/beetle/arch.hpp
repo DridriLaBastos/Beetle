@@ -55,7 +55,8 @@ namespace ARCH
 	 * the arch layer but the kernel does not force anything. It is an early stage bypass, the output destination
 	 * is at the discretion of the architecture implementation.
 	 */
-	int DebugOutput(const char* fmt, ...) __attribute__((format(printf,1,2)));
+	//REDOC:
+	void DebugOutput(const char c);
 
 	//TODO: redo the doc
 	/**

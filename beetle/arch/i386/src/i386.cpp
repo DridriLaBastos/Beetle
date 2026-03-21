@@ -417,16 +417,12 @@ extern "C" void PrepareProtected(const uintptr_t stackstart, const unsigned int 
 	idt[0x20] = CreateGateDescriptor((uint32_t)(uintptr_t)ARCH::I386::irq0,CreateSegmentSelector(1,0),DESCRIPTOR_TYPE::SYSTEM_32b_IG,0).uival;
 }
 
-int ARCH::DebugOutput(const char* fmt, ...)
+void ARCH::DebugOutput(const char c)
 {
-	for (char c = *fmt; c = *fmt; c = *(++fmt))
-	{
-		uint8_t status;
+	uint8_t status;
 
-		do {
-			status = ARCH::I386::inb(COM1_BASE+5);
-		} while (!(status & 0b100000));
-		ARCH::I386::outb(c,COM1_BASE);
-	}
-	return 1;
+	do {
+		status = ARCH::I386::inb(COM1_BASE+5);
+	} while (!(status & 0b100000));
+	ARCH::I386::outb(c,COM1_BASE);
 }

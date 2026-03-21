@@ -1,3 +1,4 @@
+#include "beetle/klib.hpp"
 #include "beetle/arch.hpp"
 #include "beetle/const.hpp"
 
@@ -51,12 +52,8 @@ static void parseMultibootInfo(const MultibootInformation* const multibootInfo)
 #endif
 }
 
-// Parameters will be passed by registers
-__attribute__((naked))
-static void SyscallHandler(void) {
-
-	//TODO: How to make this function architecture independent ?
-	__asm__ volatile ("retf");
+static void* GetInitServiceFromElfModules(const MultibootInformation* const multibootInfo)
+{
 }
 
 extern "C" void kmain (const uint32_t eax, const MultibootInformation* const multibootInfo)
@@ -109,10 +106,11 @@ extern "C" void kmain (const uint32_t eax, const MultibootInformation* const mul
 
 	ARCH::Isolate();
 	ARCH::Init((void*)multibootInfo->mem_upper);
-	ARCH::DebugOutput("*** REACHED ***\n");
-
+	
 	// At this point all the necessary components of the architecture layer has been initialized and the kernel
 	// consider the hardware safe to use. It will now load the necessary boot image to start the ball rolling
+
+	kprintf("*** REACHED ***\n");
 
 	ARCH::Connect();
 

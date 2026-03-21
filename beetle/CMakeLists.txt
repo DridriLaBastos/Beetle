@@ -15,7 +15,7 @@ add_subdirectory(arch)
 
 set(BEETLE_PROJECT_NAME_REVISION "${PROJECT_NAME}.${PROJECT_VERSION}" PARENT_SCOPE)
 
-file(GLOB CXX_SOURCES CONFIGURE_DEPENDS "*.cpp" "src/*.cpp" "src/api/*.cpp")
+file(GLOB CXX_SOURCES CONFIGURE_DEPENDS "*.cpp" "src/*.cpp" "src/api/*.cpp" "src/klib/*.cpp")
 file(GLOB ASM_SOURCES CONFIGURE_DEPENDS "*.asm")
 
 add_executable(beetle ${CXX_SOURCES} ${ASM_SOURCES})
