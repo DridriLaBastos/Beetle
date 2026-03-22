@@ -18,5 +18,13 @@
 		"stdarg.h": "c",
 		"stdbool.h": "c"
 	},
-	"editor.formatOnSave": false
+	"editor.formatOnSave": false,
+	"todohighlight.keywords": [
+		{
+			"text": "REDOC:",
+			"color": "#ffffff",
+			"backgroundColor": "#0000ff",
+			"overviewRulerColor": "#0000ff",
+		}
+	]
 }

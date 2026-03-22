@@ -394,7 +394,7 @@ void ARCH::MoveToUserLand(void *execFileBaseAddress, void *linearAddress)
 		: [userSS] "irm"((uint32_t)CreateSegmentSelector(6, PRIVILEGE3)), [userESP] "i"((uint32_t)4000), [userEFLAGS] "i"((uint32_t)0), [userCS] "irm"((uint32_t)CreateSegmentSelector(4, PRIVILEGE3)), [userEIP] "m"((uint32_t)linearAddress), [userDS] "irm"(CreateSegmentSelector(5, PRIVILEGE3)) : "ax");
 }
 
-extern "C" void PrepareProtected(const uintptr_t stackstart, const unsigned int stackBytes)
+extern "C" void PrepareProtected(void)
 {
 	// From intel doc the first entry in the GDT must be 0
 	gdt[0].uival = 0;
@@ -403,7 +403,7 @@ extern "C" void PrepareProtected(const uintptr_t stackstart, const unsigned int 
 	// kernel data
 	gdt[2] = CreateSegmentDescriptor(0, 0xFFFFF, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE0, GRANULARITY_4K, SIZE_32b);
 	// kernel stack need to be created depending on the available memory
-	gdt[3] = CreateSegmentDescriptor(stackstart, stackBytes, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE0, GRANULARITY_BYTES, SIZE_32b);
+	gdt[3] = CreateSegmentDescriptor(0, 0xFFFFF, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE0, GRANULARITY_4K, SIZE_32b);
 
 	// user code
 	gdt[4].uival = 0;

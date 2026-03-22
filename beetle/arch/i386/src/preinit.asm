@@ -14,8 +14,6 @@ preinit:
 	out 0xA1, al ;masking interrupts in PIC 2
 	cli ;disabling nmi while switching to protected mode
 
-	push kernel_stack.end - kernel_stack
-	push kernel_stack
 	call PrepareProtected
 
 	lgdt [gdtr] ;Loading the gdtr structure created in arch.cpp
@@ -43,7 +41,8 @@ preinit:
 	;Loading privilege 0 stack segment
 	mov ax, 0x18
 	mov ss, ax
-	mov esp, kernel_stack.end - kernel_stack
+	mov ebp, kernel_stack
+	mov esp, kernel_stack.end
 
 	;Setting the stack frame for kmain
 	; first args = saved value of eax
