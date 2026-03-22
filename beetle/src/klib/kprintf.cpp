@@ -4,21 +4,21 @@
 
 static int ParseInt10(int d)
 {
-    char r [9] = {0,0,0,0,0,0,0,0,0};
+    char r [10] = {0,0,0,0,0,0,0,0,0,0};
     unsigned int length = 0;
 
     if (d < 0)
     {
         ARCH::DebugOutput('-');
-        return 0;
+        d = -d;
     }
 
-    while (d != 0)
+    do
     {
         const int m = d % 10;
         d /= 10;
         r[length++] = m + '0';
-    }
+    } while (d != 0);
 
     for (int i = length-1; i >= 0; i--)
     {
@@ -30,16 +30,12 @@ static int ParseInt10(int d)
 
 static void ParseArgs (const char** fmtptr, va_list* args)
 {
-    const char specifier = *(*(fmtptr++));
+    const char specifier = *((*fmtptr)++);
 
     switch (specifier)
     {
         case 'd':
-        {
-            asm volatile ("xchg %bx, %bx");
-            const int length = ParseInt10(va_arg(*args,int));
-            (*fmtptr) += length;
-        } break;
+            ParseInt10(va_arg(*args,int));
 
         default:
             ARCH::DebugOutput(specifier);
