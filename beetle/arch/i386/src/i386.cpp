@@ -245,33 +245,10 @@ static void InitSerial()
 	}
 }
 
-void ARCH::Init(void* firstAvailableMemory)
+static void InitIDT()
 {
-	//Sanity checks
-	static_assert(sizeof(void*) == sizeof(uint32_t), "Not compiling for i386 architecture : void* is greater than 32bits");
-	static_assert(sizeof(uintptr_t) == sizeof(uint32_t), "Not compiling for i386 architecture : uintptr_t is greater than 32bits");
-
-	InitSerial();
-
 	// IRQ from the master interrupt controller are wired into 0x20 to 0x28
-
-	// IRQ from the slave interrupt controller are wired into 0x30 to 0x38
-
-	// Beetle syscall will be wired into 0xBE
-}
-
-void ARCH::Isolate()
-{
-	// Clear interrupt flags ans stop receiving them
-	__asm__ ("cli");
-
-	// Isolate both IRQs controller
-	__asm__ volatile (
-		"mov $0xFF, %%al\n"
-		"out %%al, $0x21\n"
-		"out %%al, $0xA1\n"
-		:::"al"
-	);
+	idt[0x20] = CreateGateDescriptor((uint32_t)(uintptr_t)ARCH::I386::irq0,CreateSegmentSelector(1,0),DESCRIPTOR_TYPE::SYSTEM_32b_IG,0).uival;
 }
 
 static constexpr uint8_t MakeICW1 (const bool icw4Needed, const bool singleMode)
@@ -284,7 +261,7 @@ static constexpr uint8_t MakeICW4 (const bool autoEoi, const bool isMaster)
 	return 0b00001001 | (((int)isMaster) << 2) | (((int)autoEoi) << 1);
 }
 
-void ARCH::Connect()
+static void InitPIC()
 {
 	// Reseting interrupt controllers
 	__asm__ volatile 
@@ -316,9 +293,46 @@ void ARCH::Connect()
 		"mov %3, %%al\n"	// Preparing ICW4 PIC2 into al
 		"out %%al, $0xA1\n"	// out ICW1 PIC2
 
-		/* End of initialization steps -> unmasking the PIC */
-		// End of initialization from the OS side : strictly speaking, the PICs are fully initialized
-		// after receiving the ICW4 command word
+		: /*outputs*/
+		: /*inputs*/ "i" (MakeICW1(true,false)), "i" (MakeICW1(true,false)), "i" (MakeICW4(false,true)), "i" (MakeICW4(false,false))
+		: /*clobbers*/ "eax"
+
+	);
+}
+
+void ARCH::Init(void* firstAvailableMemory)
+{
+	//Sanity checks
+	static_assert(sizeof(void*) == sizeof(uint32_t), "Not compiling for i386 architecture : void* is greater than 32bits");
+	static_assert(sizeof(uintptr_t) == sizeof(uint32_t), "Not compiling for i386 architecture : uintptr_t is greater than 32bits");
+
+	InitSerial();
+
+	InitIDT();
+
+	InitPIC();
+}
+
+void ARCH::Isolate()
+{
+	// Clear interrupt flags and stop receiving them
+	__asm__ ("cli");
+
+	// Isolate both IRQs controller
+	__asm__ volatile (
+		"mov $0xFF, %%al\n"
+		"out %%al, $0x21\n"
+		"out %%al, $0xA1\n"
+		:::"al"
+	);
+}
+
+void ARCH::Connect()
+{
+	// Reseting interrupt controllers
+	__asm__ volatile 
+	(
+		// Unmasking all interrupts from the PICs
 		"mov $0, %%al\n"
 		"out %%al, $0x21\n"
 		"out %%al, $0xA1\n"
@@ -333,12 +347,11 @@ void ARCH::Connect()
 	__asm__ ("sti");
 }
 
-// c linkage needed because the function si called from asm block
 __attribute__((naked))
 static void SyscallPrepare(void)
 {
-	//TODO: With optimizations enabled can the compiler detects that the
-	// the argument is already in the register and thus not push it ?
+	//TODO: With optimizations enabled can the compiler detects that
+	// the arguments are already in the cpu registers and thus not push it ?
 	register BEETLE::ESysCallFn syscallFn;
 	__asm__ volatile ("movl %%eax, %0\n"
 	: /*outputs*/
@@ -411,10 +424,6 @@ extern "C" void PrepareProtected(void)
 	gdt[5].uival = 0;
 	// user stack needs to be created depending on the available memory
 	gdt[6] = CreateSegmentDescriptor(0, 0xFFFFF, DESCRIPTOR_TYPE::DATA_RW, PRIVILEGE3, GRANULARITY_4K, SIZE_32b);
-
-
-	// idt[0x08] = CreateGateDescriptor((uint32_t)(uintptr_t)ARCH::I386::interruptDF,CreateSegmentSelector(1,0),DESCRIPTOR_TYPE::SYSTEM_32b_IG,0).uival;
-	idt[0x20] = CreateGateDescriptor((uint32_t)(uintptr_t)ARCH::I386::irq0,CreateSegmentSelector(1,0),DESCRIPTOR_TYPE::SYSTEM_32b_IG,0).uival;
 }
 
 void ARCH::DebugOutput(const char c)
