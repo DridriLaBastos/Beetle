@@ -3,6 +3,7 @@
 #include <beetle/arch.hpp>
 
 #include "i386.hpp"
+#include "types.inl"
 
 #define PIC_EOI 0x20
 #define MASTER_PIC_PORT 0x20
@@ -33,25 +34,35 @@ void ARCH::I386::interruptVE  (const void*, const int) { asm("xchg %bx, %bx"); }
 
 /**
  * Stack when calling this function:
- * SS
- * ESP
- * EFLAGS
- * CS
- * EIP
+ * SS       (interrupted)
+ * ESP      (interrupted)
+ * EFLAGS   (interrupted)
+ * CS       (interrupted)
+ * EIP      (interrupted)
  */
-void ARCH::I386::irq0 (const void*)
+void ARCH::I386::irq0 (void)
 {
-    // __asm__ volatile(
-    //     "pushd eax\n"
-    //     "pushd ebx\n"
-    //     "pushd ecx\n"
-    //     "pushd edx\n"
-    //     "pushd edi\n"
-    //     "pushd esi\n"
-    //     "pushd ebp\n"
-    //     "movzd eax"
-    // );
-    outb(PIC_EOI,MASTER_PIC_PORT);
+	__asm__ volatile ("pusha");
+
+	__asm__ volatile ("push %gs");
+	__asm__ volatile ("push %fs");
+	__asm__ volatile ("push %es");
+	__asm__ volatile ("push %ds");
+
+	__asm__ volatile ("push %esp"); // Point to the pushed registers that represent a frame context
+	__asm__ volatile ("call Beetle_Api_Schedule");
+	__asm__ volatile ("add $4, %esp");
+
+	__asm__ volatile ("pop %ds");
+	__asm__ volatile ("pop %es");
+	__asm__ volatile ("pop %fs");
+	__asm__ volatile ("pop %gs");
+
+	__asm__ volatile ("popa");
+
+	outb(PIC_EOI,MASTER_PIC_PORT);
+
+	__asm__ volatile ("iret");
 }
 
 void ARCH::I386::irq1 (const void*) { outb(PIC_EOI,MASTER_PIC_PORT); }

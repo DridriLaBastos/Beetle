@@ -13,6 +13,8 @@
 
 namespace ARCH
 {
+	struct ExecutionContext;
+
 	/**
 	 * \brief Must initialize the architecture and connect the kernel API
 	 * 
@@ -25,8 +27,7 @@ namespace ARCH
 	 * informations of what the kernel requires for its api is available in the BEETLE::API namespace documentation
 	 */
 	void Init(void *firstAvailableMemory);
-	void EndlessLoop(void);
-	void MoveToUserLand(void *execFileBaseAddress, void *linearAddress);
+	[[noreturn]] void EndlessLoop(void);
 
 	/**
 	 * @brief Isolate the kernel during the early initialization stage so that it is not interrupted during its configuration
@@ -75,6 +76,8 @@ namespace ARCH
 	void ConfigureTick(const unsigned int minUSec);
 
 	void MakeSyscall (const BEETLE::ESysCallFn syscallFn);
+
+	void Init(ExecutionContext& executionContext, void* firstInstructionAddr);
 }
 
 /**
@@ -89,10 +92,18 @@ namespace ARCH
  */
 namespace BEETLE::API
 {
-	void Schedule (void);
-
+	
 	void Syscall (const BEETLE::ESysCallFn syscallfn);
 	
 }
+
+// The function might be called from pure asm. Event if GCC doesn't see it used in the code we don't want it to
+// optimize the function away.
+__attribute__((used))
+extern "C" void Beetle_Api_Schedule (ARCH::ExecutionContext*);
+
+#ifndef ARCH_IMPL
+	#include "arch/types.inl"
+#endif
 
 #endif

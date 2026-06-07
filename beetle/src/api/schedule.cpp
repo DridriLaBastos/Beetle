@@ -1,5 +1,7 @@
 #include "beetle/arch.hpp"
 #include "beetle/process.hpp"
 
-void BEETLE::API::Schedule() {
+__attribute__((used))
+void Beetle_Api_Schedule(ARCH::ExecutionContext* frame)
+{
 }

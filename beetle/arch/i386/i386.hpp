@@ -157,7 +157,7 @@ namespace ARCH::I386 {
 	__attribute__((interrupt)) void interruptXM  (const void* ptr, const int errorCode);
 	__attribute__((interrupt)) void interruptVE  (const void* ptr, const int errorCode);
 	 
-	__attribute__((interrupt)) void irq0 (const void* ptr);
+	__attribute__((naked)) void irq0 (void);
 	__attribute__((interrupt)) void irq1 (const void* ptr);
 	__attribute__((interrupt)) void irq2 (const void* ptr);
 	__attribute__((interrupt)) void irq3 (const void* ptr);
